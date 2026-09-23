@@ -206,3 +206,372 @@ a {
     color: var(--honey);
   }
 }
+
+/* ===================================================================
+   Seed mix finder
+   =================================================================== */
+
+:root {
+  --monarch: #c2410c;
+  --bee: #7c3aed;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --monarch: #fb923c;
+    --bee: #c4b5fd;
+  }
+}
+
+.main > section + section {
+  margin-top: 3rem;
+}
+
+.section__intro,
+.intro__text {
+  margin: 0 0 1.25rem;
+  color: var(--ink-soft);
+}
+
+.intro__text {
+  max-width: 60ch;
+}
+
+/* --- the survey --- */
+
+.survey {
+  display: grid;
+  gap: 1.75rem;
+}
+
+.question {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.question__legend {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  padding: 0;
+  margin-bottom: 0.75rem;
+}
+
+.question__number {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 999px;
+  background: var(--pollen);
+  color: var(--honey-deep);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.question__title {
+  display: block;
+  font-weight: 650;
+}
+
+.question__help {
+  display: block;
+  color: var(--ink-soft);
+  font-size: 0.875rem;
+}
+
+.options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+  gap: 0.6rem;
+}
+
+.option {
+  display: block;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: 0.6rem;
+  background: var(--surface);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.12s, background 0.12s, transform 0.08s;
+}
+
+.option:hover {
+  border-color: var(--honey);
+}
+
+.option:active {
+  transform: translateY(1px);
+}
+
+.option:focus-visible {
+  outline: 2px solid var(--honey-deep);
+  outline-offset: 2px;
+}
+
+.option--on {
+  border-color: var(--honey);
+  background: var(--pollen);
+  box-shadow: inset 0 0 0 1px var(--honey);
+}
+
+.option__label {
+  display: block;
+  font-weight: 600;
+  font-size: 0.925rem;
+}
+
+.option__detail {
+  display: block;
+  margin-top: 0.15rem;
+  color: var(--ink-soft);
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+
+.option--on .option__detail {
+  color: var(--ink);
+  opacity: 0.75;
+}
+
+.pending {
+  margin: 0;
+  padding: 1.25rem 1.4rem;
+  border: 1px dashed var(--border);
+  border-radius: 0.6rem;
+  color: var(--ink-soft);
+}
+
+/* --- results --- */
+
+.results__lead {
+  margin: 0 0 1.25rem;
+  color: var(--ink-soft);
+}
+
+.warnings {
+  display: grid;
+  gap: 0.6rem;
+  margin-bottom: 1.25rem;
+}
+
+.warning {
+  margin: 0;
+  padding: 0.85rem 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.warning--hard {
+  border-left: 4px solid var(--error);
+  background: color-mix(in srgb, var(--error) 8%, var(--surface));
+}
+
+.warning--soft {
+  border-left: 4px solid var(--honey);
+  background: var(--pollen);
+}
+
+.mixtabs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  gap: 0.6rem;
+  margin-bottom: 1.5rem;
+}
+
+.mixtab {
+  padding: 0.75rem 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: 0.6rem;
+  background: var(--surface);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.mixtab:hover {
+  border-color: var(--honey);
+}
+
+.mixtab:focus-visible {
+  outline: 2px solid var(--honey-deep);
+  outline-offset: 2px;
+}
+
+.mixtab--on {
+  border-color: var(--leaf);
+  background: color-mix(in srgb, var(--leaf) 10%, var(--surface));
+  box-shadow: inset 0 0 0 1px var(--leaf);
+}
+
+.mixtab__name {
+  display: block;
+  font-weight: 650;
+  font-size: 0.925rem;
+}
+
+.mixtab__tagline {
+  display: block;
+  margin-top: 0.15rem;
+  color: var(--ink-soft);
+  font-size: 0.78rem;
+  line-height: 1.4;
+}
+
+.mix {
+  padding: 1.4rem;
+  border: 1px solid var(--border);
+  border-radius: 0.7rem;
+  background: var(--surface);
+}
+
+.mix__blurb {
+  margin: 0 0 1.25rem;
+  color: var(--ink-soft);
+}
+
+.mix__heading {
+  margin: 1.75rem 0 0;
+  font-size: 1rem;
+}
+
+/* --- what it does for each species --- */
+
+.serves {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+.serves__side {
+  padding: 0.9rem 1rem;
+  border-radius: 0.5rem;
+  background: var(--pollen);
+}
+
+.serves__who {
+  margin: 0 0 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--honey-deep);
+}
+
+.serves__list {
+  margin: 0;
+  padding-left: 1.1rem;
+  font-size: 0.875rem;
+  line-height: 1.55;
+}
+
+.serves__list strong {
+  color: var(--ink);
+}
+
+/* --- plants by season --- */
+
+.season {
+  margin-top: 1.5rem;
+}
+
+.season__title {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--leaf);
+}
+
+.season__why {
+  margin: 0.2rem 0 0.75rem;
+  color: var(--ink-soft);
+  font-size: 0.85rem;
+}
+
+.plants {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.plant {
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 0.55rem;
+}
+
+.plant__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.plant__common {
+  font-weight: 650;
+}
+
+.plant__latin {
+  color: var(--ink-soft);
+  font-size: 0.85rem;
+}
+
+.plant__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin: 0.5rem 0;
+}
+
+.tag {
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  background: var(--pollen);
+  color: var(--ink-soft);
+  font-size: 0.72rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.tag--bloom {
+  color: var(--honey-deep);
+}
+
+.tag--monarch {
+  background: color-mix(in srgb, var(--monarch) 14%, transparent);
+  color: var(--monarch);
+}
+
+.tag--bee {
+  background: color-mix(in srgb, var(--bee) 14%, transparent);
+  color: var(--bee);
+}
+
+.tag--nest {
+  background: color-mix(in srgb, var(--leaf) 14%, transparent);
+  color: var(--leaf);
+}
+
+.plant__why {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.footer__note {
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+  opacity: 0.8;
+}
