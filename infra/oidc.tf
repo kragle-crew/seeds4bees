@@ -129,9 +129,14 @@ data "aws_iam_policy_document" "github_deploy" {
   }
 
   statement {
-    sid       = "Route53Write"
-    effect    = "Allow"
-    actions   = ["route53:ChangeResourceRecordSets", "route53:ListResourceRecordSets", "route53:GetHostedZone"]
+    sid    = "Route53Write"
+    effect = "Allow"
+    actions = [
+      "route53:ChangeResourceRecordSets",
+      "route53:GetHostedZone",
+      "route53:ListResourceRecordSets",
+      "route53:ListTagsForResource",
+    ]
     resources = ["arn:aws:route53:::hostedzone/${data.aws_route53_zone.this.zone_id}"]
   }
 
@@ -157,11 +162,27 @@ data "aws_iam_policy_document" "github_deploy" {
     resources = ["arn:aws:dynamodb:${var.region}:${data.aws_caller_identity.current.account_id}:table/${local.name}*"]
   }
 
+  # Covers both log groups the stack owns: the Lambda's and API Gateway's
+  # access log. The `:*` variants match log streams within each group.
   statement {
-    sid       = "Logs"
+    sid     = "Logs"
+    effect  = "Allow"
+    actions = ["logs:*"]
+    resources = [
+      "arn:aws:logs:${var.region}:${data.aws_caller_identity.current.account_id}:log-group:/aws/lambda/${local.name}-*",
+      "arn:aws:logs:${var.region}:${data.aws_caller_identity.current.account_id}:log-group:/aws/lambda/${local.name}-*:*",
+      "arn:aws:logs:${var.region}:${data.aws_caller_identity.current.account_id}:log-group:/aws/apigateway/${local.name}-*",
+      "arn:aws:logs:${var.region}:${data.aws_caller_identity.current.account_id}:log-group:/aws/apigateway/${local.name}-*:*",
+    ]
+  }
+
+  # DescribeLogGroups is an account-wide query that ignores resource scoping,
+  # so it cannot be narrowed. It only reveals log group names.
+  statement {
+    sid       = "DescribeLogGroups"
     effect    = "Allow"
-    actions   = ["logs:*"]
-    resources = ["arn:aws:logs:${var.region}:${data.aws_caller_identity.current.account_id}:log-group:/aws/lambda/${local.name}-*"]
+    actions   = ["logs:DescribeLogGroups"]
+    resources = ["*"]
   }
 
   # --- IAM ---
@@ -190,10 +211,15 @@ data "aws_iam_policy_document" "github_deploy" {
     resources = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${local.name}-*"]
   }
 
+  # The provider is looked up by URL, which the AWS provider implements as a
+  # List followed by a Get. List takes no resource scope.
   statement {
-    sid       = "ReadOidcProvider"
-    effect    = "Allow"
-    actions   = ["iam:GetOpenIDConnectProvider"]
+    sid    = "ReadOidcProvider"
+    effect = "Allow"
+    actions = [
+      "iam:GetOpenIDConnectProvider",
+      "iam:ListOpenIDConnectProviders",
+    ]
     resources = ["*"]
   }
 
