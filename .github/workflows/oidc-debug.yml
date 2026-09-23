@@ -1,0 +1,33 @@
+name: OIDC debug
+
+# Temporary. Prints the identifying claims of the GitHub OIDC token so the
+# deploy role's trust policy can be matched against reality. Delete once the
+# deploy workflow authenticates.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  claims:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Show token claims
+        run: |
+          # Request a token, then print only the routing claims. The raw JWT
+          # is a bearer credential and is never echoed.
+          RESPONSE="$(curl -sS \
+            -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=sts.amazonaws.com")"
+
+          PAYLOAD="$(echo "$RESPONSE" | jq -r '.value' | cut -d. -f2)"
+
+          # base64url -> base64, padded so `base64 -d` accepts it.
+          PADDED="$(echo "$PAYLOAD" | tr '_-' '/+')"
+          while [ $(( ${#PADDED} % 4 )) -ne 0 ]; do PADDED="${PADDED}="; done
+
+          echo "$PADDED" | base64 -d | jq '{iss, aud, sub, repository, repository_owner, ref, workflow_ref}'
