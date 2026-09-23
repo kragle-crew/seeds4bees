@@ -1,0 +1,89 @@
+name: CI
+
+# Validation only. This workflow runs on pull requests and deliberately holds
+# no AWS access:
+#
+#   * It never requests the `id-token: write` permission, so no OIDC token can
+#     be minted for it.
+#   * Terraform runs with `-backend=false`, so it never reaches for remote
+#     state.
+#
+# Even if both of those were undone, the deploy role's trust policy only
+# accepts `refs/heads/main`, so a pull request still could not authenticate.
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.head_ref }}
+  cancel-in-progress: true
+
+jobs:
+  web:
+    name: Web build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Install
+        working-directory: web
+        run: npm ci
+
+      - name: Build
+        working-directory: web
+        run: npm run build
+
+  api:
+    name: API tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: api/package-lock.json
+
+      - name: Install
+        working-directory: api
+        run: npm ci
+
+      - name: Test
+        working-directory: api
+        run: npm test
+
+  terraform:
+    name: Terraform validate
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.16.3
+
+      - name: Format check
+        working-directory: infra
+        run: terraform fmt -check -recursive -diff
+
+      - name: Validate
+        working-directory: infra
+        # -backend=false keeps this offline: no state, no credentials, no
+        # network calls to AWS.
+        run: |
+          terraform init -backend=false
+          terraform validate

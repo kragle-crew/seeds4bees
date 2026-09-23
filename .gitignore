@@ -1,0 +1,25 @@
+# --- editors ---
+.idea/
+.vscode/
+.DS_Store
+
+# --- node ---
+node_modules/
+dist/
+*.log
+npm-debug.log*
+
+# --- terraform ---
+.terraform/
+.terraform.lock.hcl.bak
+*.tfstate
+*.tfstate.*
+*.tfplan
+tfplan
+crash.log
+# never commit variable files: they can carry account-specific or secret values
+*.auto.tfvars
+terraform.tfvars
+
+# --- build artifacts ---
+infra/build/

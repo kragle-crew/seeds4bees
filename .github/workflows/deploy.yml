@@ -1,0 +1,124 @@
+name: Deploy
+
+# The only workflow with AWS access. It runs on main after merge, and
+# authenticates with short-lived OIDC credentials, so no AWS keys are stored
+# in GitHub.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write # required to mint the OIDC token
+
+# Never run two deploys at once, and never cancel one midway: a half-applied
+# Terraform run is worse than a slow queue.
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+env:
+  AWS_REGION: us-west-2
+
+jobs:
+  deploy:
+    name: Deploy to AWS
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            web/package-lock.json
+            api/package-lock.json
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.16.3
+
+      - name: Authenticate to AWS
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+          role-session-name: gha-deploy-${{ github.run_id }}
+
+      # --- infrastructure, including the Lambda code ---
+
+      - name: Terraform apply
+        id: terraform
+        working-directory: infra
+        run: |
+          ./init.sh -input=false
+          terraform apply -auto-approve -input=false
+
+      - name: Collect outputs
+        id: outputs
+        working-directory: infra
+        run: |
+          {
+            echo "bucket=$(terraform output -raw site_bucket)"
+            echo "distribution=$(terraform output -raw cloudfront_distribution_id)"
+            echo "url=$(terraform output -raw site_url)"
+          } >> "$GITHUB_OUTPUT"
+
+      # --- static site ---
+
+      - name: Build site
+        working-directory: web
+        run: |
+          npm ci
+          npm run build
+
+      - name: Upload hashed assets
+        # Filenames carry a content hash, so they can be cached indefinitely.
+        run: |
+          aws s3 sync web/dist "s3://${{ steps.outputs.outputs.bucket }}" \
+            --delete \
+            --exclude "index.html" \
+            --cache-control "public, max-age=31536000, immutable"
+
+      - name: Upload entry point
+        # index.html must never be cached, or a deploy would not be visible
+        # until the old copy expired.
+        run: |
+          aws s3 sync web/dist "s3://${{ steps.outputs.outputs.bucket }}" \
+            --exclude "*" \
+            --include "index.html" \
+            --cache-control "no-cache, must-revalidate"
+
+      - name: Invalidate CloudFront
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id "${{ steps.outputs.outputs.distribution }}" \
+            --paths "/index.html" "/"
+
+      # --- prove it actually works ---
+
+      - name: Smoke test
+        run: |
+          URL="${{ steps.outputs.outputs.url }}"
+
+          echo "Checking $URL/api/health"
+          curl --fail --silent --show-error --retry 5 --retry-delay 5 \
+            --retry-all-errors "$URL/api/health"
+
+          echo
+          echo "Checking $URL/api/hello"
+          curl --fail --silent --show-error --retry 5 --retry-delay 5 \
+            --retry-all-errors "$URL/api/hello"
+
+      - name: Summary
+        run: |
+          {
+            echo "### Deployed"
+            echo ""
+            echo "- Site: ${{ steps.outputs.outputs.url }}"
+            echo "- Commit: \`${{ github.sha }}\`"
+          } >> "$GITHUB_STEP_SUMMARY"
