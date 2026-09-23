@@ -1,0 +1,48 @@
+name: PR access probe
+
+# Temporary verification. Proves that a pull request cannot obtain AWS
+# credentials even when it tries as hard as it can.
+#
+# This workflow deliberately does the things a misconfigured or malicious PR
+# workflow would do: it requests `id-token: write` and calls STS directly with
+# a real OIDC token. The job passes only if AWS refuses.
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+  id-token: write # deliberately requested, to show it is not sufficient
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Attempt to assume the deploy role
+        env:
+          ROLE_ARN: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+        run: |
+          TOKEN="$(curl -sS \
+            -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=sts.amazonaws.com" \
+            | jq -r '.value')"
+
+          # Show which identity is being presented. Not the token itself.
+          PAYLOAD="$(echo "$TOKEN" | cut -d. -f2 | tr '_-' '/+')"
+          while [ $(( ${#PAYLOAD} % 4 )) -ne 0 ]; do PAYLOAD="${PAYLOAD}="; done
+          echo "Presenting subject:"
+          echo "$PAYLOAD" | base64 -d | jq -r '.sub'
+          echo
+
+          if aws sts assume-role-with-web-identity \
+               --role-arn "$ROLE_ARN" \
+               --role-session-name pr-access-probe \
+               --web-identity-token "$TOKEN" \
+               --region us-west-2 > /dev/null 2> error.txt; then
+            echo "::error::A pull request obtained AWS credentials. The trust policy is too permissive."
+            exit 1
+          fi
+
+          echo "Denied, as intended:"
+          cat error.txt
