@@ -23,7 +23,8 @@ export default function App() {
       <footer className="footer">
         <p>
           Built by the Kragle Crew &middot;{' '}
-          <a href="https://github.com/kragle-crew/seeds4bees">Source on GitHub</a>
+          <a href="https://github.com/kragle-crew/seeds4bees">Source on GitHub</a>{' '}
+          &middot; Hosted on AWS
         </p>
       </footer>
     </div>
