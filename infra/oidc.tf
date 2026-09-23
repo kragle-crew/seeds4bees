@@ -6,10 +6,30 @@ data "aws_iam_openid_connect_provider" "github" {
   url = "https://token.actions.githubusercontent.com"
 }
 
+locals {
+  github_owner = split("/", var.github_repo)[0]
+  github_name  = split("/", var.github_repo)[1]
+
+  # GitHub is rolling out immutable numeric ids inside the subject claim, so a
+  # token may spell the repo either way:
+  #
+  #   repo:kragle-crew/seeds4bees:ref:refs/heads/main
+  #   repo:kragle-crew@231585183/seeds4bees@1380718162:ref:refs/heads/main
+  #
+  # Both forms are accepted so the role survives the rollout in either
+  # direction. The wildcards are safe because `@` must follow each name
+  # immediately: a lookalike org such as "kragle-crew-evil" fails to match,
+  # since the literal prefix "kragle-crew@" does not appear in it.
+  github_subjects = [
+    "repo:${local.github_owner}/${local.github_name}:ref:refs/heads/${var.deploy_branch}",
+    "repo:${local.github_owner}@*/${local.github_name}@*:ref:refs/heads/${var.deploy_branch}",
+  ]
+}
+
 # The heart of the "PRs get no AWS access" requirement.
 #
-# `sub` is matched with StringEquals against exactly one ref. A pull_request
-# run presents sub = "repo:<repo>:pull/<n>/merge", which does not match, so STS
+# `sub` is pinned to one branch ref. A pull_request run presents
+# sub = "repo:<repo>:pull/<n>/merge", which matches neither pattern, so STS
 # refuses the credentials outright. This holds even if a workflow is later
 # misconfigured to request `id-token: write` on a PR, and it holds for forks.
 data "aws_iam_policy_document" "github_deploy_trust" {
@@ -29,9 +49,9 @@ data "aws_iam_policy_document" "github_deploy_trust" {
     }
 
     condition {
-      test     = "StringEquals"
+      test     = "StringLike"
       variable = "token.actions.githubusercontent.com:sub"
-      values   = ["repo:${var.github_repo}:ref:refs/heads/${var.deploy_branch}"]
+      values   = local.github_subjects
     }
   }
 }
