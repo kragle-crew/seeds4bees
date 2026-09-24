@@ -706,3 +706,270 @@ a {
   gap: 0.5rem;
   margin-bottom: 1.5rem;
 }
+
+/* --- checking a flower you already like --- */
+
+.start__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 2rem;
+}
+
+.start__row .start {
+  margin-top: 0;
+}
+
+.start--alt {
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: inset 0 0 0 1px var(--border);
+}
+
+.start--alt:hover {
+  box-shadow: inset 0 0 0 1px var(--honey);
+  filter: none;
+}
+
+.searchbox {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 0.6rem;
+  background: var(--surface);
+  color: inherit;
+  font: inherit;
+  font-size: 1rem;
+}
+
+.searchbox:focus-visible {
+  outline: 2px solid var(--honey-deep);
+  outline-offset: 2px;
+  border-color: var(--honey);
+}
+
+.flowercheck__hint,
+.flowercheck__empty {
+  margin: 1.25rem 0 0.6rem;
+  color: var(--ink-soft);
+  font-size: 0.875rem;
+}
+
+.hits {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.hit {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: inherit;
+  font: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.hit:hover {
+  border-color: var(--honey);
+}
+
+.hit:focus-visible {
+  outline: 2px solid var(--honey-deep);
+  outline-offset: 2px;
+}
+
+.hit--on {
+  border-color: var(--leaf);
+  background: color-mix(in srgb, var(--leaf) 12%, var(--surface));
+}
+
+.dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 999px;
+  flex: none;
+}
+
+.dot--great { background: var(--leaf); }
+.dot--good { background: var(--honey); }
+.dot--limited { background: var(--ink-soft); }
+.dot--caution { background: var(--monarch); }
+
+/* --- the verdict card --- */
+
+.verdict {
+  margin-top: 1.75rem;
+  padding: 1.4rem;
+  border: 1px solid var(--border);
+  border-radius: 0.7rem;
+  background: var(--surface);
+}
+
+.verdict__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.4rem;
+}
+
+.verdict__name {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.badge {
+  padding: 0.2rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.badge--great {
+  background: color-mix(in srgb, var(--leaf) 18%, transparent);
+  color: var(--leaf);
+}
+
+.badge--good {
+  background: var(--pollen);
+  color: var(--honey-deep);
+}
+
+.badge--limited {
+  background: color-mix(in srgb, var(--ink-soft) 18%, transparent);
+  color: var(--ink-soft);
+}
+
+.badge--caution {
+  background: color-mix(in srgb, var(--monarch) 16%, transparent);
+  color: var(--monarch);
+}
+
+.verdict__native {
+  margin: 0 0 0.6rem;
+  color: var(--leaf);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.verdict__summary {
+  margin: 0 0 0.75rem;
+  color: var(--ink-soft);
+}
+
+.verdict__note {
+  margin: 0 0 1rem;
+  padding: 0.75rem 0.9rem;
+  border-left: 3px solid var(--honey);
+  border-radius: 0 0.4rem 0.4rem 0;
+  background: var(--pollen);
+  color: var(--ink);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.helps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 0.75rem;
+  margin: 1.25rem 0;
+}
+
+.help {
+  padding: 0.85rem 1rem;
+  border-radius: 0.5rem;
+  background: var(--pollen);
+}
+
+.help__head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.35rem;
+}
+
+.help__mark {
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.help__mark--yes {
+  background: color-mix(in srgb, var(--leaf) 22%, transparent);
+  color: var(--leaf);
+}
+
+.help__mark--partly {
+  background: color-mix(in srgb, var(--honey) 26%, transparent);
+  color: var(--honey-deep);
+}
+
+.help__mark--no {
+  background: color-mix(in srgb, var(--ink-soft) 20%, transparent);
+  color: var(--ink-soft);
+}
+
+.help__who {
+  font-size: 0.85rem;
+  font-weight: 650;
+}
+
+.help__text {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.verdict__caption {
+  margin: 0 0 0.3rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--honey-deep);
+}
+
+.verdict__care p {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+}
+
+.verdict__swap {
+  margin-top: 1.25rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--border);
+}
+
+.swap__name {
+  margin: 0 0 0.35rem;
+  font-weight: 650;
+}
+
+.swap__why,
+.swap__care,
+.swap__note {
+  margin: 0 0 0.4rem;
+  color: var(--ink-soft);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.swap__note {
+  margin-bottom: 0;
+  font-style: italic;
+}

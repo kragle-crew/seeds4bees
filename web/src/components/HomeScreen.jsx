@@ -7,7 +7,7 @@ import ApiStatus from './ApiStatus.jsx';
  * seven questions. Someone who lands here without knowing what a rusty
  * patched bumble bee is should still understand why the questions matter.
  */
-export default function HomeScreen({ onStart, questionCount, plantCount }) {
+export default function HomeScreen({ onStart, onCheckFlower, questionCount, plantCount }) {
   return (
     <>
       <header className="hero">
@@ -21,9 +21,15 @@ export default function HomeScreen({ onStart, questionCount, plantCount }) {
           <strong>monarch butterfly</strong>.
         </p>
 
-        <button type="button" className="start" onClick={onStart}>
-          Find my seed mix
-        </button>
+        <div className="start__row">
+          <button type="button" className="start" onClick={onStart}>
+            Find my seed mix
+          </button>
+
+          <button type="button" className="start start--alt" onClick={onCheckFlower}>
+            Check a flower I like
+          </button>
+        </div>
 
         <p className="start__note">
           {questionCount} questions, about a minute. Nothing is saved and you do

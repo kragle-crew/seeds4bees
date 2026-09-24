@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 
+import FlowerCheck from './components/FlowerCheck.jsx';
 import HomeScreen from './components/HomeScreen.jsx';
 import QuestionScreen from './components/QuestionScreen.jsx';
 import SeedMixResults from './components/SeedMixResults.jsx';
@@ -83,6 +84,7 @@ export default function App() {
       {stage === 'home' && (
         <HomeScreen
           onStart={() => goTo('survey', 0)}
+          onCheckFlower={() => goTo('flower')}
           questionCount={questions.length}
           plantCount={plants.length}
         />
@@ -99,6 +101,12 @@ export default function App() {
             onAnswer={answer}
             onBack={back}
           />
+        </main>
+      )}
+
+      {stage === 'flower' && (
+        <main className="main">
+          <FlowerCheck onHome={startOver} />
         </main>
       )}
 
