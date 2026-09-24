@@ -21,16 +21,25 @@ import {
   typicalHeight,
 } from '../src/lib/recommend.js';
 
-/** A plain sunny garden bed: the most common case by far. */
-const sunnyBed = siteFrom({
+/**
+ * Default answers, so a test only has to state the part it cares about.
+ * A plain sunny garden bed: the most common case by far.
+ */
+const answers = (overrides = {}) => ({
   place: 'yard',
   sun: 'sun',
   moisture: 'medium',
+  standing: 'none',
   soil: 'loam',
+  lime: 'unknown',
   size: 'small',
   height: 'medium',
+  spread: 'fine',
   deer: 'none',
+  ...overrides,
 });
+
+const sunnyBed = siteFrom(answers());
 
 test('the plant data is internally consistent', () => {
   const ids = plants.map((p) => p.id);
@@ -128,15 +137,7 @@ test('the same answers always produce the same mixes', () => {
 });
 
 test('a height limit is judged on typical height, not the extreme', () => {
-  const low = siteFrom({
-    place: 'yard',
-    sun: 'sun',
-    moisture: 'dry',
-    soil: 'sand',
-    size: 'small',
-    height: 'low',
-    deer: 'none',
-  });
+  const low = siteFrom(answers({ place: 'yard', sun: 'sun', moisture: 'dry', soil: 'sand', size: 'small', height: 'low', deer: 'none' }));
 
   for (const plant of poolFor(low)) {
     assert.ok(
@@ -147,15 +148,7 @@ test('a height limit is judged on typical height, not the extreme', () => {
 });
 
 test('pots cap height even when the visitor says plants may grow tall', () => {
-  const pots = siteFrom({
-    place: 'container',
-    sun: 'sun',
-    moisture: 'medium',
-    soil: 'loam',
-    size: 'tiny',
-    height: 'tall',
-    deer: 'none',
-  });
+  const pots = siteFrom(answers({ place: 'container', sun: 'sun', moisture: 'medium', soil: 'loam', size: 'tiny', height: 'tall', deer: 'none' }));
 
   assert.equal(pots.maxHeight, 2.5, 'the stricter of the two caps must win');
 
@@ -165,15 +158,7 @@ test('pots cap height even when the visitor says plants may grow tall', () => {
 });
 
 test('a roadside site only gets salt tolerant plants', () => {
-  const roadside = siteFrom({
-    place: 'roadside',
-    sun: 'sun',
-    moisture: 'dry',
-    soil: 'sand',
-    size: 'small',
-    height: 'medium',
-    deer: 'none',
-  });
+  const roadside = siteFrom(answers({ place: 'roadside', sun: 'sun', moisture: 'dry', soil: 'sand', size: 'small', height: 'medium', deer: 'none' }));
 
   const pool = poolFor(roadside);
 
@@ -184,15 +169,7 @@ test('a roadside site only gets salt tolerant plants', () => {
 });
 
 test('deer pressure removes the plants deer strip first', () => {
-  const browsed = siteFrom({
-    place: 'yard',
-    sun: 'sun',
-    moisture: 'medium',
-    soil: 'loam',
-    size: 'small',
-    height: 'medium',
-    deer: 'some',
-  });
+  const browsed = siteFrom(answers({ place: 'yard', sun: 'sun', moisture: 'medium', soil: 'loam', size: 'small', height: 'medium', deer: 'some' }));
 
   for (const plant of poolFor(browsed)) {
     assert.ok(plant.deerResistant, `${plant.common} is deer candy`);
@@ -200,15 +177,7 @@ test('deer pressure removes the plants deer strip first', () => {
 });
 
 test('the app says so when a site cannot grow milkweed', () => {
-  const deepShade = siteFrom({
-    place: 'yard',
-    sun: 'shade',
-    moisture: 'wet',
-    soil: 'clay',
-    size: 'small',
-    height: 'low',
-    deer: 'none',
-  });
+  const deepShade = siteFrom(answers({ place: 'yard', sun: 'shade', moisture: 'wet', soil: 'clay', size: 'small', height: 'low', deer: 'none' }));
 
   const { pool, warnings } = recommend(deepShade);
 
@@ -231,15 +200,7 @@ test('an impossible site returns no mixes and explains itself', () => {
 
 test('a mix never exceeds the number of species the area calls for', () => {
   for (const size of ['tiny', 'small', 'medium', 'large']) {
-    const site = siteFrom({
-      place: 'yard',
-      sun: 'sun',
-      moisture: 'medium',
-      soil: 'loam',
-      size,
-      height: 'tall',
-      deer: 'none',
-    });
+    const site = siteFrom(answers({ size, height: 'tall' }));
 
     for (const mix of recommend(site).mixes) {
       assert.ok(
@@ -340,15 +301,7 @@ test('every species on the Xerces Great Lakes list is in our data', () => {
 
 test('the same mix is never offered twice under different names', () => {
   // A site that suits only a few plants makes every strategy converge.
-  const thin = siteFrom({
-    place: 'raingarden',
-    sun: 'shade',
-    moisture: 'wet',
-    soil: 'clay',
-    size: 'small',
-    height: 'tall',
-    deer: 'none',
-  });
+  const thin = siteFrom(answers({ place: 'raingarden', sun: 'shade', moisture: 'wet', soil: 'clay', size: 'small', height: 'tall', deer: 'none' }));
 
   for (const site of [sunnyBed, thin]) {
     const { mixes } = recommend(site);
@@ -361,4 +314,87 @@ test('the same mix is never offered twice under different names', () => {
 test('a site with real variety still gets several different mixes', () => {
   const { mixes } = recommend(sunnyBed);
   assert.ok(mixes.length > 1, 'a rich site should offer a genuine choice');
+});
+
+test('standing water is a harsher test than damp soil', () => {
+  const damp = siteFrom(answers({ moisture: 'wet', soil: 'clay', height: 'tall' }));
+  const flooded = siteFrom(answers({
+    moisture: 'wet',
+    soil: 'clay',
+    height: 'tall',
+    standing: 'days',
+  }));
+
+  const dampPool = poolFor(damp);
+  const floodedPool = poolFor(flooded);
+
+  assert.ok(
+    floodedPool.length < dampPool.length,
+    'a site that floods should suit fewer plants than one that is merely damp',
+  );
+
+  for (const plant of floodedPool) {
+    assert.ok(plant.standingWater, `${plant.common} would drown`);
+    assert.ok(plant.moisture.includes('wet'), `${plant.common} is not a wet-ground plant`);
+  }
+});
+
+test('a brief puddle rules nothing out', () => {
+  const none = poolFor(siteFrom(answers({ moisture: 'wet' })));
+  const hours = poolFor(siteFrom(answers({ moisture: 'wet', standing: 'hours' })));
+
+  assert.deepEqual(
+    hours.map((p) => p.id),
+    none.map((p) => p.id),
+    'most plants cope with water standing for a few hours',
+  );
+});
+
+test('limey soil rules out only the plants that need acid ground', () => {
+  const sandy = { moisture: 'dry', soil: 'sand', height: 'tall' };
+  const open = poolFor(siteFrom(answers(sandy)));
+  const limey = poolFor(siteFrom(answers({ ...sandy, lime: 'limey' })));
+
+  const dropped = open.filter((p) => !limey.includes(p));
+
+  assert.ok(dropped.length > 0, 'the question should actually do something');
+  for (const plant of dropped) {
+    assert.ok(plant.needsAcidSoil, `${plant.common} was dropped for no reason`);
+  }
+});
+
+test('not knowing the soil pH rules nothing out', () => {
+  const unknown = poolFor(siteFrom(answers({ lime: 'unknown' })));
+  const acidic = poolFor(siteFrom(answers({ lime: 'acidic' })));
+
+  assert.deepEqual(unknown.map((p) => p.id), acidic.map((p) => p.id));
+});
+
+test('asking for tidy plants excludes the ones that run', () => {
+  const tidy = poolFor(siteFrom(answers({ spread: 'tidy' })));
+  const loose = poolFor(siteFrom(answers({ spread: 'fine' })));
+
+  assert.ok(tidy.length < loose.length, 'some plants really do spread');
+  for (const plant of tidy) {
+    assert.ok(!plant.spreads, `${plant.common} will not stay put`);
+  }
+});
+
+test('a tidy bed can still be given milkweed', () => {
+  const { mixes, pool } = recommend(siteFrom(answers({ spread: 'tidy' })));
+
+  assert.ok(
+    pool.some((p) => p.monarch === 'host'),
+    'excluding spreaders must not cost the site every milkweed',
+  );
+  for (const mix of mixes) assert.ok(mix.hasMilkweed);
+});
+
+test('every plant flagged for standing water is a wet-ground plant', () => {
+  for (const plant of plants.filter((p) => p.standingWater)) {
+    assert.ok(
+      plant.moisture.includes('wet'),
+      `${plant.common} claims to take flooding but is not tagged wet`,
+    );
+  }
 });

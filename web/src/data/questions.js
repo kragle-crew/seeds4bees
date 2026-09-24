@@ -3,14 +3,26 @@
  *
  * Every question here has to earn its place by actually changing the plant
  * list. A question whose answer we would ignore is just a chore for the
- * visitor, so there are no "what is your favorite color" questions.
+ * visitor, so there are no "what is your favorite colour" questions.
+ *
+ * ONE DELIBERATE OMISSION
+ *
+ * There is no question about air humidity. The whole Upper Midwest is humid
+ * continental, so it is close to identical everywhere we cover and separates
+ * no two plants on this list. What people usually mean by that concern is
+ * soil dampness and drainage, which questions 3 and 4 ask properly: how wet
+ * the ground stays is a different thing from whether water sits on top of it,
+ * and the two rule out different plants.
  *
  * Each option carries the facts the matcher needs:
  *   sun / moisture / soil   the condition the plant must tolerate
  *   maxHeight               feet, for spots where tall plants are a problem
  *   requireSalt             only salt-tolerant plants survive here
- *   species                 how many kinds of plant to recommend
+ *   requireStandingWater    only plants that take being submerged
+ *   limeySoil               drop the plants that need acid ground
+ *   noSpreaders             drop the plants that run or self-seed around
  *   deerPressure            drop the plants deer strip first
+ *   species                 how many kinds of plant to recommend
  */
 
 export const questions = [
@@ -86,7 +98,7 @@ export const questions = [
       {
         value: 'wet',
         label: 'Wet',
-        detail: 'Stays damp, puddles after rain, or sits low where water drains to',
+        detail: 'Stays damp, or sits low where water drains to',
         moisture: 'wet',
       },
       {
@@ -104,27 +116,73 @@ export const questions = [
     ],
   },
   {
+    id: 'standing',
+    title: 'After a heavy storm, does water sit on top of the ground?',
+    help: 'This is a different question from the last one. Soil can stay damp for weeks and never flood, and a plant that likes damp can still drown.',
+    options: [
+      {
+        value: 'none',
+        label: 'No, it soaks in',
+        detail: 'Water disappears into the ground and never pools',
+      },
+      {
+        value: 'hours',
+        label: 'It puddles for a few hours',
+        detail: 'A shallow pool that is gone by the next morning. Most plants cope',
+      },
+      {
+        value: 'days',
+        label: 'Water sits for days',
+        detail: 'A real pond after a storm. Roots are underwater and most plants rot',
+        requireStandingWater: true,
+      },
+    ],
+  },
+  {
     id: 'soil',
     title: 'What is the soil like?',
-    help: 'Grab a damp handful and squeeze it. What it does tells you which one it is.',
+    help: 'Wet a handful, squeeze it, then try to roll it into a snake between your palms. What happens tells you which one you have.',
     options: [
       {
         value: 'sand',
         label: 'Sandy',
-        detail: 'Gritty, falls apart in your hand, water disappears straight down',
+        detail: 'Gritty. Falls apart and will not roll into anything',
         soil: 'sand',
       },
       {
         value: 'loam',
         label: 'Rich and crumbly',
-        detail: 'Dark, holds together loosely, full of worms. The good stuff',
+        detail: 'Rolls into a short snake that cracks and breaks. Dark, full of worms',
         soil: 'loam',
       },
       {
         value: 'clay',
         label: 'Heavy clay',
-        detail: 'Sticky, rolls into a rope, cracks when dry and glues to your shoes',
+        detail: 'Rolls into a long bendy snake and stays shiny. Cracks when dry',
         soil: 'clay',
+      },
+    ],
+  },
+  {
+    id: 'lime',
+    title: 'Is your soil limey or acidic?',
+    help: 'A cheap test kit answers this, or your county extension office tests it. Only a few plants care, so skipping this costs you little.',
+    options: [
+      {
+        value: 'unknown',
+        label: 'No idea',
+        detail: 'Most of our plants cope with either, so we will not rule anything out',
+      },
+      {
+        value: 'limey',
+        label: 'Limey or chalky',
+        detail: 'Alkaline, above pH 7. Common over limestone or near old concrete',
+        limeySoil: true,
+      },
+      {
+        value: 'acidic',
+        label: 'Acidic',
+        detail: 'Below pH 7. Common in sandy pine country and old woodland',
       },
     ],
   },
@@ -136,25 +194,25 @@ export const questions = [
       {
         value: 'tiny',
         label: 'A few pots',
-        detail: 'Smaller than a door laid flat',
+        detail: 'Under about 20 square feet, or a couple of containers',
         species: 5,
       },
       {
         value: 'small',
         label: 'A garden bed',
-        detail: 'About the size of a car',
+        detail: 'Roughly 20 to 200 square feet, about the footprint of a car',
         species: 8,
       },
       {
         value: 'medium',
         label: 'A big patch',
-        detail: 'About the size of a classroom',
+        detail: 'Roughly 200 to 1,000 square feet, about the size of a classroom',
         species: 12,
       },
       {
         value: 'large',
         label: 'A field',
-        detail: 'Bigger than a basketball court',
+        detail: 'Over 1,000 square feet, bigger than a basketball court',
         species: 16,
       },
     ],
@@ -181,6 +239,24 @@ export const questions = [
         label: 'Let them get tall',
         detail: 'Anything goes, including plants taller than you',
         maxHeight: 99,
+      },
+    ],
+  },
+  {
+    id: 'spread',
+    title: 'Should plants stay where you put them?',
+    help: 'Some natives run underground or seed themselves everywhere. That is free ground cover in a rough area and a nuisance in a tidy bed.',
+    options: [
+      {
+        value: 'fine',
+        label: 'Spreading is fine',
+        detail: 'We want it to fill in and crowd out weeds on its own',
+      },
+      {
+        value: 'tidy',
+        label: 'Keep them in place',
+        detail: 'Stick to plants that stay in a clump and do not wander',
+        noSpreaders: true,
       },
     ],
   },
@@ -229,6 +305,9 @@ export function siteFrom(answers) {
     soil: null,
     maxHeight: 99,
     requireSalt: false,
+    requireStandingWater: false,
+    limeySoil: false,
+    noSpreaders: false,
     deerPressure: false,
     species: 8,
   };
@@ -238,6 +317,9 @@ export function siteFrom(answers) {
     if (option.moisture) site.moisture = option.moisture;
     if (option.soil) site.soil = option.soil;
     if (option.requireSalt) site.requireSalt = true;
+    if (option.requireStandingWater) site.requireStandingWater = true;
+    if (option.limeySoil) site.limeySoil = true;
+    if (option.noSpreaders) site.noSpreaders = true;
     if (option.deerPressure) site.deerPressure = true;
     if (option.species) site.species = option.species;
     // Two questions can cap height: the pot question and the height question.

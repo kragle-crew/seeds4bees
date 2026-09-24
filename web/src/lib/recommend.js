@@ -45,6 +45,17 @@ export function matchesSite(plant, site) {
   if (site.requireSalt && !plant.saltTolerant) return false;
   if (site.deerPressure && !plant.deerResistant) return false;
 
+  // Standing water is a harsher test than damp soil. Plenty of plants want
+  // wet ground and still drown when their roots are underwater for days.
+  if (site.requireStandingWater && !plant.standingWater) return false;
+
+  // Only a short list genuinely needs acid ground, so this rules out little.
+  if (site.limeySoil && plant.needsAcidSoil) return false;
+
+  // Spreading is a virtue in a rough area and a nuisance in a tidy bed, so
+  // this is the visitor's call rather than ours.
+  if (site.noSpreaders && plant.spreads) return false;
+
   return true;
 }
 
