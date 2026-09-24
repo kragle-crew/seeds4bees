@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 
+import DataPage from './components/DataPage.jsx';
 import FlowerCheck from './components/FlowerCheck.jsx';
 import HomeScreen from './components/HomeScreen.jsx';
 import QuestionScreen from './components/QuestionScreen.jsx';
@@ -85,6 +86,7 @@ export default function App() {
         <HomeScreen
           onStart={() => goTo('survey', 0)}
           onCheckFlower={() => goTo('flower')}
+          onSeeData={() => goTo('data')}
           questionCount={questions.length}
           plantCount={plants.length}
         />
@@ -107,6 +109,12 @@ export default function App() {
       {stage === 'flower' && (
         <main className="main">
           <FlowerCheck onHome={startOver} />
+        </main>
+      )}
+
+      {stage === 'data' && (
+        <main className="main">
+          <DataPage onHome={startOver} />
         </main>
       )}
 

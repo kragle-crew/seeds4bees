@@ -5,7 +5,13 @@
  * seven questions. Someone who lands here without knowing what a rusty
  * patched bumble bee is should still understand why the questions matter.
  */
-export default function HomeScreen({ onStart, onCheckFlower, questionCount, plantCount }) {
+export default function HomeScreen({
+  onStart,
+  onCheckFlower,
+  onSeeData,
+  questionCount,
+  plantCount,
+}) {
   return (
     <>
       <header className="hero">
@@ -70,7 +76,11 @@ export default function HomeScreen({ onStart, onCheckFlower, questionCount, plan
             </li>
           </ol>
           <p className="how__note">
-            Our list has {plantCount} native plants of the Upper Midwest.
+            Our list has {plantCount} native plants of the Upper Midwest.{' '}
+            <button type="button" className="linkish" onClick={onSeeData}>
+              See the data behind the mixes
+            </button>{' '}
+            to check any of it yourself.
           </p>
         </section>
       </main>

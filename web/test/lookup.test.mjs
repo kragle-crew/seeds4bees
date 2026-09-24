@@ -19,6 +19,7 @@ import {
   search,
   swapFor,
 } from '../src/lib/lookup.js';
+import { strategies, typicalHeight } from '../src/lib/recommend.js';
 
 test('every plant is searchable exactly once', () => {
   const ids = entries.map((e) => e.id);
@@ -147,4 +148,42 @@ test('native entries describe where they grow', () => {
   assert.match(milkweed.care, /sun/);
   assert.match(milkweed.care, /ft$/);
   assert.ok(milkweed.native);
+});
+
+// --- the data page's promise: what it shows is what the matcher uses ---
+
+test('every strategy exposes a callable score for every plant', () => {
+  // The data page prints these numbers as the reason one plant outranked
+  // another. If a score threw or came back non-numeric, the page would be
+  // quietly lying about the decision.
+  for (const strategy of strategies) {
+    for (const plant of plants) {
+      const score = strategy.score(plant);
+
+      assert.equal(
+        typeof score,
+        'number',
+        `${strategy.name} produced a non-number for ${plant.common}`,
+      );
+      assert.ok(Number.isFinite(score), `${strategy.name} scored ${plant.common} as ${score}`);
+    }
+  }
+});
+
+test('a strategy filter, where present, is callable on every plant', () => {
+  for (const strategy of strategies.filter((s) => s.filter)) {
+    for (const plant of plants) {
+      assert.equal(typeof strategy.filter(plant), 'boolean');
+    }
+  }
+});
+
+test('every plant carries the attributes the data table prints', () => {
+  for (const plant of plants) {
+    assert.ok(plant.common && plant.scientific, 'needs both names');
+    assert.ok(plant.bloom, `${plant.common} needs a bloom time`);
+    assert.ok(['early', 'mid', 'late'].includes(plant.season));
+    assert.ok(['flower', 'grass', 'shrub'].includes(plant.type), `${plant.common} type`);
+    assert.equal(typeof typicalHeight(plant), 'number');
+  }
 });

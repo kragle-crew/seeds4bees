@@ -888,3 +888,236 @@ a {
   color: var(--leaf);
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--leaf) 35%, transparent);
 }
+
+/* --- the data page --- */
+
+.linkish {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--honey-deep);
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.linkish:focus-visible {
+  outline: 2px solid var(--honey-deep);
+  outline-offset: 2px;
+}
+
+.counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 1.25rem 0 2rem;
+}
+
+.count {
+  padding: 0.5rem 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  background: var(--surface);
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+}
+
+.count strong {
+  color: var(--ink);
+  font-size: 1rem;
+}
+
+.rules {
+  margin-bottom: 2.5rem;
+}
+
+.rules__title {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+}
+
+.rules__lead {
+  margin: 0 0 0.75rem;
+  max-width: 68ch;
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.rules__list {
+  margin: 0 0 1rem;
+  padding-left: 1.25rem;
+  max-width: 68ch;
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.rules__list li {
+  margin-bottom: 0.4rem;
+}
+
+.rules__list strong {
+  color: var(--ink);
+}
+
+.rules__note {
+  margin: 0 0 0.75rem;
+  color: var(--ink-soft);
+  font-size: 0.8rem;
+  font-style: italic;
+}
+
+.strategies {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: 0.75rem;
+}
+
+.strategy {
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  background: var(--surface);
+}
+
+.strategy__name {
+  margin: 0 0 0.3rem;
+  font-size: 0.9rem;
+}
+
+.strategy__blurb {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.strategy__filter {
+  margin: 0.5rem 0 0;
+  color: var(--honey-deep);
+  font-size: 0.78rem;
+}
+
+.datacontrols {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 1rem 0 0.5rem;
+}
+
+.datacontrols .searchbox {
+  width: auto;
+  flex: 1 1 12rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.9rem;
+}
+
+.check {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--ink-soft);
+  font-size: 0.85rem;
+}
+
+.check select {
+  padding: 0.3rem 0.4rem;
+  border: 1px solid var(--border);
+  border-radius: 0.4rem;
+  background: var(--surface);
+  color: inherit;
+  font: inherit;
+  font-size: 0.85rem;
+}
+
+/* The table is genuinely wide. It scrolls sideways on its own rather than
+   forcing the whole page to. */
+.tablewrap {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+}
+
+.datatable {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
+.datatable th,
+.datatable td {
+  padding: 0.45rem 0.6rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+
+.datatable thead th {
+  position: sticky;
+  top: 0;
+  background: var(--pollen);
+  color: var(--honey-deep);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.datatable tbody th {
+  font-weight: 600;
+  white-space: normal;
+  min-width: 11rem;
+}
+
+.datatable tbody th .plant__latin {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 400;
+}
+
+.datatable tbody tr:last-child th,
+.datatable tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.datatable .num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.muted {
+  color: var(--ink-soft);
+}
+
+.flags {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+.flag {
+  padding: 0.05rem 0.4rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ink-soft) 16%, transparent);
+  color: var(--ink-soft);
+  font-size: 0.68rem;
+  font-weight: 600;
+}
+
+.flag--xerces {
+  background: color-mix(in srgb, var(--leaf) 16%, transparent);
+  color: var(--leaf);
+}
+
+.flag--flood,
+.flag--acid {
+  background: color-mix(in srgb, var(--bee) 16%, transparent);
+  color: var(--bee);
+}
+
+.flag--spread {
+  background: color-mix(in srgb, var(--monarch) 16%, transparent);
+  color: var(--monarch);
+}
