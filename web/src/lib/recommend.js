@@ -279,10 +279,32 @@ export function warningsFor(pool, site) {
   return warnings;
 }
 
+/**
+ * Collapses mixes that came out identical.
+ *
+ * On a site that only suits a handful of plants, every strategy reaches for
+ * the same ones and there is genuinely just one answer. Presenting that one
+ * answer four times under four names would imply a choice that does not
+ * exist. The first strategy to produce a given list keeps it.
+ */
+const distinct = (mixes) => {
+  const seen = new Set();
+
+  return mixes.filter((mix) => {
+    const signature = mix.picks.map((plant) => plant.id).join(',');
+    if (seen.has(signature)) return false;
+
+    seen.add(signature);
+    return true;
+  });
+};
+
 /** The whole recommendation: what could grow, what we suggest, what to watch for. */
 export function recommend(site, plants = ALL_PLANTS) {
   const pool = poolFor(site, plants);
-  const mixes = pool.length ? strategies.map((s) => buildMix(s, pool, site)) : [];
+  const mixes = pool.length
+    ? distinct(strategies.map((s) => buildMix(s, pool, site)))
+    : [];
 
   return { pool, mixes, warnings: warningsFor(pool, site) };
 }

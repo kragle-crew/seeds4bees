@@ -51,6 +51,7 @@ function PlantVerdict({ entry }) {
         <p className="verdict__native">
           Native to the Upper Midwest
           {entry.bloom ? ` · blooms ${entry.bloom}` : ''}
+          {entry.xercesListed ? ' · on the Xerces Society Great Lakes list' : ''}
         </p>
       )}
 

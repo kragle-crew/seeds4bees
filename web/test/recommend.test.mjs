@@ -288,3 +288,77 @@ test('every strategy can build a mix without crashing on a thin pool', () => {
     assert.ok(mix.picks.length <= 2);
   }
 });
+
+test('every species on the Xerces Great Lakes list is in our data', () => {
+  // Checked against the copy of that list hosted in the Lady Bird Johnson
+  // Wildflower Center plant database. If a future edit drops one of these,
+  // the app quietly loses a plant an outside authority vouched for.
+  const xerces = [
+    'Agastache scrophulariifolia',
+    'Amorpha canescens',
+    'Asclepias tuberosa',
+    'Ceanothus americanus',
+    'Cirsium discolor',
+    'Coreopsis lanceolata',
+    'Crataegus crus-galli',
+    'Dalea purpurea',
+    'Echinacea purpurea',
+    'Eryngium yuccifolium',
+    'Eutrochium purpureum',
+    'Gentiana andrewsii',
+    'Liatris pycnostachya',
+    'Lobelia siphilitica',
+    'Lupinus perennis',
+    'Monarda fistulosa',
+    'Monarda punctata',
+    'Penstemon digitalis',
+    'Pycnanthemum virginianum',
+    'Silphium perfoliatum',
+    'Solidago speciosa',
+    'Symphyotrichum lateriflorum',
+    'Symphyotrichum novae-angliae',
+    'Verbesina alternifolia',
+  ];
+
+  for (const species of xerces) {
+    const plant = plants.find((p) => p.scientific === species);
+
+    assert.ok(plant, `${species} is on the Xerces list but missing from our data`);
+    assert.ok(
+      plant.xercesListed,
+      `${plant.common} is on the Xerces list but is not flagged as such`,
+    );
+  }
+
+  const flagged = plants.filter((p) => p.xercesListed);
+  assert.equal(
+    flagged.length,
+    xerces.length,
+    'something is flagged as Xerces-listed that is not on the list',
+  );
+});
+
+test('the same mix is never offered twice under different names', () => {
+  // A site that suits only a few plants makes every strategy converge.
+  const thin = siteFrom({
+    place: 'raingarden',
+    sun: 'shade',
+    moisture: 'wet',
+    soil: 'clay',
+    size: 'small',
+    height: 'tall',
+    deer: 'none',
+  });
+
+  for (const site of [sunnyBed, thin]) {
+    const { mixes } = recommend(site);
+    const signatures = mixes.map((m) => m.picks.map((p) => p.id).join(','));
+
+    assert.equal(new Set(signatures).size, mixes.length);
+  }
+});
+
+test('a site with real variety still gets several different mixes', () => {
+  const { mixes } = recommend(sunnyBed);
+  assert.ok(mixes.length > 1, 'a rich site should offer a genuine choice');
+});

@@ -32,6 +32,11 @@ function PlantRow({ plant }) {
         {plant.monarch === 'nectar' && <span className="tag tag--monarch">Monarch nectar</span>}
         {plant.rustyPatched && <span className="tag tag--bee">Rusty patched favorite</span>}
         {plant.type === 'grass' && <span className="tag tag--nest">Nesting cover</span>}
+        {plant.xercesListed && (
+          <span className="tag tag--xerces" title="Appears on the Xerces Society Great Lakes pollinator plant list">
+            Xerces list
+          </span>
+        )}
       </div>
 
       <p className="plant__why">{plant.why}</p>

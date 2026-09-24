@@ -37,6 +37,7 @@ export function nativeAsEntry(plant) {
     verdict: great ? 'great' : 'good',
     monarch: plant.monarch,
     rustyPatched: plant.rustyPatched,
+    xercesListed: Boolean(plant.xercesListed),
     season: plant.season,
     bloom: plant.bloom,
     care: `${list(plant.sun, SUN_TEXT)}, ${list(plant.moisture, MOISTURE_TEXT)}, ${list(
