@@ -1121,3 +1121,18 @@ a {
   background: color-mix(in srgb, var(--monarch) 16%, transparent);
   color: var(--monarch);
 }
+
+.compromise {
+  margin-bottom: 1.25rem;
+  padding: 0.9rem 1.1rem;
+  border-left: 4px solid var(--monarch);
+  border-radius: 0 0.5rem 0.5rem 0;
+  background: color-mix(in srgb, var(--monarch) 9%, var(--surface));
+  font-size: 0.9rem;
+}
+
+.compromise p {
+  margin: 0.4rem 0 0;
+  color: var(--ink-soft);
+  line-height: 1.55;
+}

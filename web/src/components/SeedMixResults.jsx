@@ -1,5 +1,7 @@
 import { useState } from 'react';
 
+import { strategies } from '../lib/recommend.js';
+
 const SEASON_LABEL = {
   early: 'Spring',
   mid: 'Summer',
@@ -112,7 +114,7 @@ function ServesPanel({ serves }) {
  * than hiding the choice behind a single confident-looking list.
  */
 export default function SeedMixResults({ result, onReview, onRestart }) {
-  const { mixes, warnings, pool } = result;
+  const { mixes, warnings, pool, relaxed = [] } = result;
   const [activeId, setActiveId] = useState(mixes[0]?.id);
 
   const active = mixes.find((m) => m.id === activeId) ?? mixes[0];
@@ -127,6 +129,21 @@ export default function SeedMixResults({ result, onReview, onRestart }) {
           Start over
         </button>
       </div>
+
+      {relaxed.length > 0 && (
+        <div className="compromise" role="note">
+          <strong>Nothing matched all your answers exactly.</strong>
+          <p>
+            To find anything at all for this spot we had to include{' '}
+            {relaxed.length === 1
+              ? relaxed[0]
+              : `${relaxed.slice(0, -1).join(', ')} and ${relaxed[relaxed.length - 1]}`}
+            . Treat the list below as the closest we have rather than a
+            promise, and change an answer above if one of those is a deal
+            breaker.
+          </p>
+        </div>
+      )}
 
       {warnings.length > 0 && (
         <div className="warnings">
@@ -146,7 +163,17 @@ export default function SeedMixResults({ result, onReview, onRestart }) {
         <>
           <p className="results__lead">
             <strong>{pool.length}</strong> plants from our list can grow in that
-            spot. Here are {mixes.length} ways to use them.
+            spot. Here {mixes.length === 1 ? 'is 1 way' : `are ${mixes.length} ways`}{' '}
+            to use them.
+            {mixes.length < strategies.length && (
+              <>
+                {' '}
+                There would normally be {strategies.length}, but with this few
+                plants to choose from every approach lands on nearly the same
+                list, so we show it once instead of pretending there is a
+                choice.
+              </>
+            )}
           </p>
 
           <div className="mixtabs" role="tablist" aria-label="Seed mix options">

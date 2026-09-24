@@ -178,15 +178,44 @@ export default function DataPage({ onHome }) {
             5, 8, 12, or 16 kinds of plant.
           </li>
           <li>
-            <strong>Collapse.</strong> Mixes that come out identical are shown
-            once. On a thin site there is genuinely only one answer.
+            <strong>Collapse.</strong> Five strategies run, but mixes that
+            come out identical are shown once. On a site suiting only a handful
+            of plants there is genuinely one answer, and printing it five times
+            under five names would imply a choice that does not exist.
           </li>
         </ol>
         <p className="rules__note">
           Ties break on plant id, so the same answers always give the same mix.
         </p>
 
-        <h3 className="rules__title">3. What each mix rewards</h3>
+        <h3 className="rules__title">3. When nothing fits</h3>
+        <p className="rules__lead">
+          Some honest answers describe a real place our list cannot fill: wet
+          sand in shade kept under two feet, or a shaded roadside. An empty
+          page teaches nobody anything, so the app loosens the softest
+          constraint and tries again, in this order, and tells you every step
+          it took.
+        </p>
+        <ol className="rules__list">
+          <li>Allow plants deer may browse.</li>
+          <li>Allow plants that spread.</li>
+          <li>Ignore the soil pH answer.</li>
+          <li>Allow plants taller than you asked for.</li>
+          <li>Allow a different soil texture.</li>
+          <li>
+            Allow plants that cannot take road salt &mdash; reached only by
+            shaded roadsides, because nothing here is documented as taking deep
+            shade and winter salt at once.
+          </li>
+        </ol>
+        <p className="rules__note">
+          Sunlight and standing water are never loosened. Getting those wrong
+          does not disappoint somebody, it kills the plant. Every one of the
+          69,984 possible answer combinations returns at least one mix, and a
+          test walks all of them.
+        </p>
+
+        <h3 className="rules__title">4. What each mix rewards</h3>
         <div className="strategies">
           {strategies.map((strategy) => (
             <div className="strategy" key={strategy.id}>
@@ -203,7 +232,7 @@ export default function DataPage({ onHome }) {
       </section>
 
       <section className="rules">
-        <h3 className="rules__title">4. Every plant, every attribute</h3>
+        <h3 className="rules__title">5. Every plant, every attribute</h3>
         <p className="rules__lead">
           The last four columns are each mix&rsquo;s score for that plant,
           computed by calling the same functions the matcher calls. A dash
@@ -299,7 +328,7 @@ export default function DataPage({ onHome }) {
       </section>
 
       <section className="rules">
-        <h3 className="rules__title">5. Garden plants and their verdicts</h3>
+        <h3 className="rules__title">6. Garden plants and their verdicts</h3>
         <p className="rules__lead">
           These drive the flower checker rather than the mixes.
         </p>

@@ -189,13 +189,20 @@ test('the app says so when a site cannot grow milkweed', () => {
   }
 });
 
-test('an impossible site returns no mixes and explains itself', () => {
+test('an impossible site is rescued rather than left empty', () => {
+  // A 1.2 inch height limit suits nothing. The app used to return an empty
+  // page here; it now loosens the softest constraints until something fits
+  // and says exactly what it gave up, which is more use to a visitor than a
+  // blank screen.
   const impossible = { ...sunnyBed, maxHeight: 0.1 };
-  const { pool, mixes, warnings } = recommend(impossible);
+  const { pool, mixes, relaxed } = recommend(impossible);
 
-  assert.equal(pool.length, 0);
-  assert.equal(mixes.length, 0);
-  assert.equal(warnings[0].level, 'hard');
+  assert.ok(pool.length > 0, 'the fallback should find something');
+  assert.ok(mixes.length > 0);
+  assert.ok(
+    relaxed.some((note) => /taller/i.test(note)),
+    'it must admit that it raised the height limit',
+  );
 });
 
 test('a mix never exceeds the number of species the area calls for', () => {
@@ -396,5 +403,79 @@ test('every plant flagged for standing water is a wet-ground plant', () => {
       plant.moisture.includes('wet'),
       `${plant.common} claims to take flooding but is not tagged wet`,
     );
+  }
+});
+
+// --- exhaustive coverage: every possible set of answers ---
+
+function* allAnswers(index = 0, acc = {}) {
+  if (index === questions.length) {
+    yield acc;
+    return;
+  }
+  for (const option of questions[index].options) {
+    yield* allAnswers(index + 1, { ...acc, [questions[index].id]: option.value });
+  }
+}
+
+test('no combination of answers is a dead end', () => {
+  // Roughly 70,000 combinations. Slow for a unit test and worth it: this is
+  // the promise that somebody who answers honestly is never handed an empty
+  // page, and it is easy to break by tightening a filter.
+  let checked = 0;
+  const failures = [];
+
+  for (const answers of allAnswers()) {
+    checked += 1;
+    const { pool, mixes } = recommend(siteFrom(answers));
+
+    if (pool.length === 0 || mixes.length === 0) {
+      if (failures.length < 5) failures.push(answers);
+    }
+  }
+
+  assert.ok(checked > 60000, `expected to walk the whole space, walked ${checked}`);
+  assert.deepEqual(failures, [], 'these answers produce nothing at all');
+});
+
+test('a compromise is always explained, and never invented', () => {
+  for (const overrides of [
+    // Wet sand in shade, kept short: a real place our list cannot fill.
+    { sun: 'shade', moisture: 'wet', soil: 'sand', height: 'low' },
+    // A shaded roadside: nothing here takes deep shade and road salt at once.
+    { place: 'roadside', sun: 'shade', moisture: 'medium', soil: 'loam' },
+  ]) {
+    const { pool, mixes, relaxed } = recommend(siteFrom(answers(overrides)));
+
+    assert.ok(pool.length > 0, 'the fallback must find something');
+    assert.ok(mixes.length > 0);
+    assert.ok(relaxed.length > 0, 'a compromise must be reported, not hidden');
+    for (const note of relaxed) assert.equal(typeof note, 'string');
+  }
+});
+
+test('an easy site needs no compromise at all', () => {
+  const { relaxed } = recommend(sunnyBed);
+  assert.deepEqual(relaxed, [], 'a plain sunny bed should match outright');
+});
+
+test('standing water settles the moisture question by itself', () => {
+  // "Dry" plus "floods for days" describes nothing real. Rather than matching
+  // nothing, the flood answer wins, because that is what standing water means.
+  const claimedDry = poolFor(siteFrom(answers({ moisture: 'dry', standing: 'days' })));
+  const claimedWet = poolFor(siteFrom(answers({ moisture: 'wet', standing: 'days' })));
+
+  assert.ok(claimedDry.length > 0, 'a contradictory answer must not be a dead end');
+  assert.deepEqual(claimedDry.map((p) => p.id), claimedWet.map((p) => p.id));
+});
+
+test('sun is never quietly relaxed', () => {
+  // Getting light wrong kills a plant, so it must survive every fallback.
+  for (const sun of ['sun', 'part', 'shade']) {
+    const { pool } = recommend(siteFrom(answers({ sun, moisture: 'wet', soil: 'sand', height: 'low' })));
+
+    for (const plant of pool) {
+      assert.ok(plant.sun.includes(sun), `${plant.common} cannot live in ${sun}`);
+    }
   }
 });

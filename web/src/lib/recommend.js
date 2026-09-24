@@ -26,6 +26,28 @@
 
 import { plants as ALL_PLANTS, SEASONS } from '../data/plants.js';
 
+const MONTHS = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December',
+];
+
+/**
+ * How many months a plant flowers for, read from its bloom string.
+ *
+ * "July to September" is three months of food; "May" is one. A plant that
+ * keeps going is worth more in a small planting, where there is no room to
+ * cover the season with sheer numbers.
+ */
+export function bloomSpan(plant) {
+  const parts = String(plant.bloom).split(' to ');
+  const start = MONTHS.indexOf(parts[0]);
+  const end = MONTHS.indexOf(parts[parts.length - 1]);
+
+  if (start < 0 || end < 0 || end < start) return 1;
+
+  return end - start + 1;
+}
+
 /**
  * Typical mature height, in feet.
  *
@@ -39,7 +61,15 @@ export const typicalHeight = (plant) => (plant.height[0] + plant.height[1]) / 2;
 /** True when a plant can actually survive the conditions described. */
 export function matchesSite(plant, site) {
   if (site.sun && !plant.sun.includes(site.sun)) return false;
-  if (site.moisture && !plant.moisture.includes(site.moisture)) return false;
+
+  // Water standing for days settles the moisture question by itself: that
+  // ground is wet, whatever the visitor guessed. Intersecting the two answers
+  // instead produced thousands of dead ends, because "dry" plus "floods for
+  // days" describes nothing real and matched nothing.
+  if (!site.requireStandingWater && site.moisture && !plant.moisture.includes(site.moisture)) {
+    return false;
+  }
+
   if (site.soil && !plant.soil.includes(site.soil)) return false;
   if (typicalHeight(plant) > site.maxHeight) return false;
   if (site.requireSalt && !plant.saltTolerant) return false;
@@ -115,6 +145,18 @@ export const strategies = [
       (plant.rustyPatched ? 5 : 0) +
       (plant.season === 'early' ? 5 : plant.season === 'late' ? 4 : 2) +
       (isGrass(plant) ? 3 : 0),
+  },
+  {
+    id: 'long-bloom',
+    name: 'Longest Bloom Mix',
+    tagline: 'The fewest plants for the most weeks of flowers',
+    blurb:
+      'Picks plants that flower for months rather than weeks. In a small bed there is no room to cover the season with sheer numbers, so each plant has to keep working.',
+    must: [isMilkweed],
+    score: (plant) =>
+      bloomSpan(plant) * 3 +
+      (plant.rustyPatched ? 2 : 0) +
+      (plant.monarch ? 2 : 0),
   },
   {
     id: 'easy-start',
@@ -310,12 +352,67 @@ const distinct = (mixes) => {
   });
 };
 
+/**
+ * What to give up on, and in what order, when nothing matches.
+ *
+ * Some answers describe a real place that our list simply cannot fill: wet
+ * sand under two feet tall, say. Handing that visitor an empty page teaches
+ * them nothing, so we loosen the softest constraint and try again, and keep
+ * going until something matches.
+ *
+ * The order matters and is not arbitrary. Deer and spreading are preferences,
+ * and a plant ignored by neither still lives. Height is a nuisance rather
+ * than a death sentence. Soil texture comes last of these because plants are
+ * more adaptable across it than our three buckets suggest.
+ *
+ * Sun and standing water are never relaxed: getting those wrong does not
+ * disappoint somebody, it kills the plant. Salt is relaxed only as a last
+ * resort, because no plant here is known to take deep shade and road salt at
+ * once, and that combination is a real place somebody might be standing in.
+ */
+const RELAXATIONS = [
+  { apply: (s) => ({ ...s, deerPressure: false }), note: 'plants that deer may browse' },
+  { apply: (s) => ({ ...s, noSpreaders: false }), note: 'plants that spread rather than staying put' },
+  { apply: (s) => ({ ...s, limeySoil: false }), note: 'plants that may want more acid soil' },
+  { apply: (s) => ({ ...s, maxHeight: 99 }), note: 'plants taller than you asked for' },
+  { apply: (s) => ({ ...s, soil: null }), note: 'plants suited to a different soil texture' },
+  {
+    // Last resort, and only reached by shaded roadsides. Nothing on our list
+    // is documented as handling both deep shade and winter salt, and inventing
+    // a tolerance would be worse than admitting the gap. The note has to carry
+    // real advice, because these plants will die where spray reaches them.
+    apply: (s) => ({ ...s, requireSalt: false }),
+    note: 'plants that cannot take road salt, so keep them well back from the pavement',
+  },
+];
+
+/**
+ * Finds the strictest version of the site that still grows something.
+ * Returns the site actually used and the compromises it took to get there.
+ */
+export function relaxUntilPossible(site, plants = ALL_PLANTS) {
+  if (poolFor(site, plants).length > 0) return { site, relaxed: [] };
+
+  let current = site;
+  const relaxed = [];
+
+  for (const step of RELAXATIONS) {
+    current = step.apply(current);
+    relaxed.push(step.note);
+
+    if (poolFor(current, plants).length > 0) return { site: current, relaxed };
+  }
+
+  return { site: current, relaxed };
+}
+
 /** The whole recommendation: what could grow, what we suggest, what to watch for. */
 export function recommend(site, plants = ALL_PLANTS) {
-  const pool = poolFor(site, plants);
+  const { site: used, relaxed } = relaxUntilPossible(site, plants);
+  const pool = poolFor(used, plants);
   const mixes = pool.length
-    ? distinct(strategies.map((s) => buildMix(s, pool, site)))
+    ? distinct(strategies.map((s) => buildMix(s, pool, used)))
     : [];
 
-  return { pool, mixes, warnings: warningsFor(pool, site) };
+  return { pool, mixes, warnings: warningsFor(pool, used), relaxed };
 }
