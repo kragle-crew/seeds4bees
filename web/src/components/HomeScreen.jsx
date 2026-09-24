@@ -1,5 +1,3 @@
-import ApiStatus from './ApiStatus.jsx';
-
 /**
  * The landing screen.
  *
@@ -74,11 +72,6 @@ export default function HomeScreen({ onStart, onCheckFlower, questionCount, plan
           <p className="how__note">
             Our list has {plantCount} native plants of the Upper Midwest.
           </p>
-        </section>
-
-        <section>
-          <h2 className="section__title">Is everything wired up?</h2>
-          <ApiStatus />
         </section>
       </main>
     </>
