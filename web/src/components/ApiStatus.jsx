@@ -1,10 +1,13 @@
 import { useHello } from '../hooks/useHello.js';
 
 /**
- * Renders the result of calling the backend.
+ * Reports whether the backend is reachable.
  *
  * This is the end-to-end proof that the whole path works: browser to
- * CloudFront to API Gateway to Lambda to DynamoDB and back.
+ * CloudFront to API Gateway to Lambda and back. The response also carries a
+ * visit count and a server clock, which this deliberately does not show:
+ * neither is any of a visitor's business, and a live counter invites people
+ * to refresh the page to watch it move.
  */
 export default function ApiStatus() {
   const state = useHello();
@@ -27,27 +30,14 @@ export default function ApiStatus() {
     );
   }
 
-  const { message, visits, timestamp } = state.data;
+  const { message } = state.data;
 
   return (
     <div className="card card--ok">
       <p className="card__message">{message}</p>
 
-      <dl className="stats">
-        <div className="stat">
-          <dt>Visits recorded</dt>
-          <dd>{visits.toLocaleString()}</dd>
-        </div>
-        <div className="stat">
-          <dt>Server time</dt>
-          <dd>
-            <time dateTime={timestamp}>{new Date(timestamp).toLocaleTimeString()}</time>
-          </dd>
-        </div>
-      </dl>
-
       <p className="card__detail">
-        That counter lives in DynamoDB, so it survives a refresh.
+        The site and the backend are talking to each other.
       </p>
     </div>
   );

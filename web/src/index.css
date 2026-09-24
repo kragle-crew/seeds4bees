@@ -135,31 +135,6 @@ body {
   opacity: 0.85;
 }
 
-/* --- stats --- */
-
-.stats {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 2rem;
-  margin: 1.25rem 0 0;
-}
-
-.stat dt {
-  color: var(--ink-soft);
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-
-.stat dd {
-  margin: 0.15rem 0 0;
-  font-size: 1.75rem;
-  font-variant-numeric: tabular-nums;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-}
-
 /* --- spinner --- */
 
 .spinner {
