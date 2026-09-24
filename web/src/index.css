@@ -227,7 +227,6 @@ a {
   margin-top: 3rem;
 }
 
-.section__intro,
 .intro__text {
   margin: 0 0 1.25rem;
   color: var(--ink-soft);
@@ -238,49 +237,6 @@ a {
 }
 
 /* --- the survey --- */
-
-.survey {
-  display: grid;
-  gap: 1.75rem;
-}
-
-.question {
-  margin: 0;
-  padding: 0;
-  border: 0;
-}
-
-.question__legend {
-  display: flex;
-  gap: 0.75rem;
-  align-items: flex-start;
-  padding: 0;
-  margin-bottom: 0.75rem;
-}
-
-.question__number {
-  flex: none;
-  display: grid;
-  place-items: center;
-  width: 1.6rem;
-  height: 1.6rem;
-  border-radius: 999px;
-  background: var(--pollen);
-  color: var(--honey-deep);
-  font-size: 0.8rem;
-  font-weight: 700;
-}
-
-.question__title {
-  display: block;
-  font-weight: 650;
-}
-
-.question__help {
-  display: block;
-  color: var(--ink-soft);
-  font-size: 0.875rem;
-}
 
 .options {
   display: grid;
@@ -337,14 +293,6 @@ a {
 .option--on .option__detail {
   color: var(--ink);
   opacity: 0.75;
-}
-
-.pending {
-  margin: 0;
-  padding: 1.25rem 1.4rem;
-  border: 1px dashed var(--border);
-  border-radius: 0.6rem;
-  color: var(--ink-soft);
 }
 
 /* --- results --- */
@@ -574,4 +522,187 @@ a {
   margin-top: 0.5rem;
   font-size: 0.8rem;
   opacity: 0.8;
+}
+
+/* --- screen flow: home, one question at a time, results --- */
+
+.topbar {
+  padding: 1.5rem 0 0;
+}
+
+.wordmark {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  cursor: pointer;
+}
+
+.wordmark:focus-visible {
+  outline: 2px solid var(--honey-deep);
+  outline-offset: 3px;
+  border-radius: 0.25rem;
+}
+
+.start {
+  display: inline-block;
+  margin-top: 2rem;
+  padding: 0.85rem 1.75rem;
+  border: 0;
+  border-radius: 999px;
+  background: var(--honey);
+  color: #1f1b14;
+  font: inherit;
+  font-size: 1.05rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.08s, filter 0.12s;
+}
+
+.start:hover {
+  filter: brightness(1.07);
+}
+
+.start:active {
+  transform: translateY(1px);
+}
+
+.start:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 3px;
+}
+
+.start__note {
+  margin: 0.75rem 0 0;
+  color: var(--ink-soft);
+  font-size: 0.85rem;
+}
+
+.how {
+  margin: 0 0 0.75rem;
+  padding-left: 1.25rem;
+  max-width: 60ch;
+  color: var(--ink-soft);
+}
+
+.how li {
+  margin-bottom: 0.6rem;
+}
+
+.how strong {
+  color: var(--ink);
+}
+
+.how__note {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 0.875rem;
+}
+
+/* --- the question screen --- */
+
+.qscreen {
+  padding-top: 1rem;
+}
+
+.progress {
+  margin-bottom: 2rem;
+}
+
+.progress__label {
+  margin-bottom: 0.5rem;
+  color: var(--ink-soft);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.progress__track {
+  height: 0.3rem;
+  border-radius: 999px;
+  background: var(--border);
+  overflow: hidden;
+}
+
+.progress__fill {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--honey);
+  transition: width 0.25s ease;
+}
+
+.qscreen__title {
+  margin: 0 0 0.35rem;
+  font-size: clamp(1.4rem, 4vw, 1.9rem);
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+}
+
+.qscreen__help {
+  margin: 0 0 1.5rem;
+  max-width: 52ch;
+  color: var(--ink-soft);
+}
+
+.qscreen .option {
+  padding: 1rem 1.1rem;
+}
+
+.qscreen .option__label {
+  font-size: 1rem;
+}
+
+.qscreen .option:disabled {
+  cursor: default;
+}
+
+.qscreen__nav {
+  margin-top: 1.75rem;
+}
+
+/* --- plain buttons --- */
+
+.btn {
+  padding: 0.5rem 1.1rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: inherit;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn:hover {
+  border-color: var(--honey);
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--honey-deep);
+  outline-offset: 2px;
+}
+
+.btn--quiet {
+  border-color: transparent;
+  background: none;
+  color: var(--ink-soft);
+  font-weight: 500;
+}
+
+.btn--quiet:hover {
+  color: var(--ink);
+  border-color: var(--border);
+}
+
+.results__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
 }

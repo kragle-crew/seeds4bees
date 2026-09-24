@@ -1,84 +1,117 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
-import ApiStatus from './components/ApiStatus.jsx';
+import HomeScreen from './components/HomeScreen.jsx';
+import QuestionScreen from './components/QuestionScreen.jsx';
 import SeedMixResults from './components/SeedMixResults.jsx';
-import SiteSurvey from './components/SiteSurvey.jsx';
-import { questionIds, siteFrom } from './data/questions.js';
+import { plants } from './data/plants.js';
+import { questions, siteFrom } from './data/questions.js';
 import { recommend } from './lib/recommend.js';
 
+/**
+ * How long a chosen answer stays on screen before the next question replaces
+ * it. Long enough to see which box was hit, short enough not to feel like
+ * waiting. Advancing instantly reads as a glitch rather than a confirmation.
+ */
+const ADVANCE_MS = 220;
+
 export default function App() {
+  const [stage, setStage] = useState('home');
+  const [index, setIndex] = useState(0);
   const [answers, setAnswers] = useState({});
 
-  const answer = (questionId, value) =>
-    setAnswers((current) => ({ ...current, [questionId]: value }));
+  // The option tapped but not yet committed, so it can stay highlighted
+  // during the pause before the next question.
+  const [pending, setPending] = useState(null);
+  const timer = useRef(null);
 
-  const answered = questionIds.filter((id) => answers[id]).length;
-  const complete = answered === questionIds.length;
+  // A pending advance must not outlive the component, or React would be told
+  // to update state that no longer exists.
+  useEffect(() => () => clearTimeout(timer.current), []);
 
-  // Recomputed only when an answer changes. The matching is fast enough to
-  // run on every render, but memoising keeps the mix from being rebuilt when
-  // the visitor merely switches tabs in the results.
+  // Each screen is a fresh page as far as the visitor is concerned, so start
+  // them at the top of it rather than wherever the last one was scrolled to.
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }, [stage, index]);
+
+  const answer = (questionId, value) => {
+    setPending(value);
+    clearTimeout(timer.current);
+
+    timer.current = setTimeout(() => {
+      setAnswers((current) => ({ ...current, [questionId]: value }));
+      setPending(null);
+
+      if (index + 1 < questions.length) setIndex(index + 1);
+      else setStage('results');
+    }, ADVANCE_MS);
+  };
+
+  const goTo = (nextStage, nextIndex = 0) => {
+    clearTimeout(timer.current);
+    setPending(null);
+    setIndex(nextIndex);
+    setStage(nextStage);
+  };
+
+  const back = () =>
+    index === 0 ? goTo('home') : goTo('survey', index - 1);
+
+  const startOver = () => {
+    setAnswers({});
+    goTo('home');
+  };
+
+  // Only computed on the results screen, and only when the answers change.
   const result = useMemo(
-    () => (complete ? recommend(siteFrom(answers)) : null),
-    [answers, complete],
+    () => (stage === 'results' ? recommend(siteFrom(answers)) : null),
+    [stage, answers],
   );
+
+  const question = questions[index];
 
   return (
     <div className="page">
-      <header className="hero">
-        <span className="hero__badge">FIRST LEGO League</span>
-        <h1 className="hero__title">
-          Seeds<span className="hero__accent">4</span>Bees
-        </h1>
-        <p className="hero__tagline">
-          Tell us about your patch of ground and we will tell you what to plant
-          for the <strong>rusty patched bumble bee</strong> and the{' '}
-          <strong>monarch butterfly</strong>.
-        </p>
-      </header>
+      {stage !== 'home' && (
+        <div className="topbar">
+          <button type="button" className="wordmark" onClick={startOver}>
+            Seeds<span className="hero__accent">4</span>Bees
+          </button>
+        </div>
+      )}
 
-      <main className="main">
-        <section className="intro">
-          <h2 className="section__title">Why these two</h2>
-          <p className="intro__text">
-            The rusty patched bumble bee was once common across the Upper
-            Midwest and is now endangered, surviving in a fraction of its old
-            range. The monarch butterfly makes a migration to Mexico that takes
-            several generations, and its caterpillars can eat only milkweed.
-            Both are running out of places to eat and nest, and both can be
-            helped by an ordinary yard planted on purpose.
-          </p>
-        </section>
+      {stage === 'home' && (
+        <HomeScreen
+          onStart={() => goTo('survey', 0)}
+          questionCount={questions.length}
+          plantCount={plants.length}
+        />
+      )}
 
-        <section>
-          <h2 className="section__title">Your planting spot</h2>
-          <p className="section__intro">
-            Click an answer for each question. Everything you pick changes which
-            plants can actually survive there.
-          </p>
+      {stage === 'survey' && (
+        <main className="main">
+          <QuestionScreen
+            question={question}
+            number={index + 1}
+            total={questions.length}
+            chosen={answers[question.id]}
+            pending={pending}
+            onAnswer={answer}
+            onBack={back}
+          />
+        </main>
+      )}
 
-          <SiteSurvey answers={answers} onAnswer={answer} />
-        </section>
-
-        <section>
+      {stage === 'results' && (
+        <main className="main">
           <h2 className="section__title">Your seed mixes</h2>
-
-          {complete ? (
-            <SeedMixResults result={result} />
-          ) : (
-            <p className="pending">
-              Answer {questionIds.length - answered} more{' '}
-              {questionIds.length - answered === 1 ? 'question' : 'questions'} and
-              your seed mixes will appear here.
-            </p>
-          )}
-        </section>
-
-        <section>
-          <h2 className="section__title">Is everything wired up?</h2>
-          <ApiStatus />
-        </section>
-      </main>
+          <SeedMixResults
+            result={result}
+            onReview={() => goTo('survey', 0)}
+            onRestart={startOver}
+          />
+        </main>
+      )}
 
       <footer className="footer">
         <p>
