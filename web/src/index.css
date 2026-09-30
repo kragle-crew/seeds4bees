@@ -1136,3 +1136,29 @@ a {
   color: var(--ink-soft);
   line-height: 1.55;
 }
+
+.tag--new {
+  margin-left: 0.5rem;
+  background: var(--honey);
+  color: #1f1b14;
+}
+
+.qlist {
+  margin: 0 0 1.5rem;
+  padding-left: 1.25rem;
+  line-height: 1.5;
+}
+
+.qlist__item {
+  margin-bottom: 0.9rem;
+}
+
+.qlist__options {
+  margin: 0.3rem 0 0;
+  padding-left: 1.1rem;
+  font-size: 0.9rem;
+}
+
+.qlist__effect {
+  color: var(--ink-soft);
+}

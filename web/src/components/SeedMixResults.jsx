@@ -113,7 +113,7 @@ function ServesPanel({ serves }) {
  * alternatives side by side and explains what each is optimising for, rather
  * than hiding the choice behind a single confident-looking list.
  */
-export default function SeedMixResults({ result, onReview, onRestart }) {
+export default function SeedMixResults({ result, onReview, onRestart, onSeeData }) {
   const { mixes, warnings, pool, relaxed = [] } = result;
   const [activeId, setActiveId] = useState(mixes[0]?.id);
 
@@ -124,6 +124,9 @@ export default function SeedMixResults({ result, onReview, onRestart }) {
       <div className="results__actions">
         <button type="button" className="btn" onClick={onReview}>
           Change my answers
+        </button>
+        <button type="button" className="btn btn--quiet" onClick={onSeeData}>
+          See the raw data
         </button>
         <button type="button" className="btn btn--quiet" onClick={onRestart}>
           Start over

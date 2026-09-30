@@ -33,6 +33,10 @@ export default function HomeScreen({
           <button type="button" className="start start--alt" onClick={onCheckFlower}>
             Check a flower I like
           </button>
+
+          <button type="button" className="start start--alt" onClick={onSeeData}>
+            See the raw data
+          </button>
         </div>
 
         <p className="start__note">

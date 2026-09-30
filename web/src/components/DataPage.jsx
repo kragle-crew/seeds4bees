@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 
 import { gardenPlants } from '../data/gardenPlants.js';
 import { plants } from '../data/plants.js';
+import { questions } from '../data/questions.js';
 import { strategies, typicalHeight } from '../lib/recommend.js';
 
 const REPO = 'https://github.com/kragle-crew/seeds4bees/blob/main/web/src';
@@ -12,6 +13,34 @@ const SOIL = { sand: 'Sand', loam: 'Loam', clay: 'Clay' };
 const SEASON = { early: 'Spring', mid: 'Summer', late: 'Fall' };
 
 const join = (values, table) => values.map((v) => table[v]).join(' ');
+
+const SUN_PHRASE = { sun: 'full sun', part: 'part sun', shade: 'shade' };
+
+/** The questions added most recently, flagged so returning visitors spot them. */
+const NEW_QUESTIONS = new Set(['standing', 'lime', 'spread']);
+
+/**
+ * What picking one answer actually does to the plant list, read straight off
+ * the option so it cannot disagree with the matcher.
+ */
+function effectOf(option) {
+  const effects = [];
+
+  if (option.sun) effects.push(`must grow in ${SUN_PHRASE[option.sun]}`);
+  if (option.moisture) effects.push(`must take ${option.moisture} ground`);
+  if (option.soil) effects.push(`must grow in ${option.soil}`);
+  if (option.requireSalt) effects.push('must be salt tolerant');
+  if (option.requireStandingWater) effects.push('must survive being flooded');
+  if (option.limeySoil) effects.push('drops plants that need acid soil');
+  if (option.noSpreaders) effects.push('drops plants that spread');
+  if (option.deerPressure) effects.push('drops plants deer eat first');
+  if (option.maxHeight && option.maxHeight < 99) {
+    effects.push(`plants must stay under about ${option.maxHeight} ft`);
+  }
+  if (option.species) effects.push(`${option.species} kinds of plant per mix`);
+
+  return effects.length ? effects.join(', ') : 'rules nothing out';
+}
 
 /**
  * Short flags, so the table stays readable.
@@ -51,7 +80,7 @@ function Flags({ plant }) {
  * calls. They cannot drift out of step with the real logic, because they are
  * the real logic.
  */
-export default function DataPage({ onHome }) {
+export default function DataPage({ onHome, onBackToMixes }) {
   const [query, setQuery] = useState('');
   const [xercesOnly, setXercesOnly] = useState(false);
   const [sort, setSort] = useState('name');
@@ -131,7 +160,30 @@ export default function DataPage({ onHome }) {
       </div>
 
       <section className="rules">
-        <h3 className="rules__title">1. What gets ruled out</h3>
+        <h3 className="rules__title">1. The questions, and what each answer does</h3>
+        <p className="rules__lead">
+          All {questions.length} questions, in the order they are asked. Next to
+          each answer is exactly what it changes about the plant list.
+        </p>
+        <ol className="qlist">
+          {questions.map((q) => (
+            <li key={q.id} className="qlist__item">
+              <strong>{q.title}</strong>
+              {NEW_QUESTIONS.has(q.id) && (
+                <span className="tag tag--new">New</span>
+              )}
+              <ul className="qlist__options">
+                {q.options.map((o) => (
+                  <li key={o.value}>
+                    {o.label}: <span className="qlist__effect">{effectOf(o)}</span>
+                  </li>
+                ))}
+              </ul>
+            </li>
+          ))}
+        </ol>
+
+        <h3 className="rules__title">2. What gets ruled out</h3>
         <p className="rules__lead">
           A plant is dropped if it fails <em>any</em> of these. No scoring
           happens until a plant survives all of them.
@@ -150,7 +202,7 @@ export default function DataPage({ onHome }) {
           <li>Where deer browse: it must be one deer usually walk past.</li>
         </ul>
 
-        <h3 className="rules__title">2. How each mix is filled</h3>
+        <h3 className="rules__title">3. How each mix is filled</h3>
         <p className="rules__lead">
           In this order. Later steps never override earlier ones.
         </p>
@@ -188,7 +240,7 @@ export default function DataPage({ onHome }) {
           Ties break on plant id, so the same answers always give the same mix.
         </p>
 
-        <h3 className="rules__title">3. When nothing fits</h3>
+        <h3 className="rules__title">4. When nothing fits</h3>
         <p className="rules__lead">
           Some honest answers describe a real place our list cannot fill: wet
           sand in shade kept under two feet, or a shaded roadside. An empty
@@ -215,7 +267,7 @@ export default function DataPage({ onHome }) {
           test walks all of them.
         </p>
 
-        <h3 className="rules__title">4. What each mix rewards</h3>
+        <h3 className="rules__title">5. What each mix rewards</h3>
         <div className="strategies">
           {strategies.map((strategy) => (
             <div className="strategy" key={strategy.id}>
@@ -232,7 +284,7 @@ export default function DataPage({ onHome }) {
       </section>
 
       <section className="rules">
-        <h3 className="rules__title">5. Every plant, every attribute</h3>
+        <h3 className="rules__title">6. Every plant, every attribute</h3>
         <p className="rules__lead">
           The last four columns are each mix&rsquo;s score for that plant,
           computed by calling the same functions the matcher calls. A dash
@@ -328,7 +380,7 @@ export default function DataPage({ onHome }) {
       </section>
 
       <section className="rules">
-        <h3 className="rules__title">6. Garden plants and their verdicts</h3>
+        <h3 className="rules__title">7. Garden plants and their verdicts</h3>
         <p className="rules__lead">
           These drive the flower checker rather than the mixes.
         </p>
@@ -364,23 +416,47 @@ export default function DataPage({ onHome }) {
       <section className="rules">
         <h3 className="rules__title">Where this came from, and what to check</h3>
         <p className="rules__lead">
-          The <strong>Xerces</strong> flag means the species appears on the
-          Xerces Society&rsquo;s Great Lakes pollinator plant list, checked
-          against{' '}
-          <a href="https://www.wildflower.org/collections/collection.php?collection=xerces_greatlakes">
-            the copy in the Lady Bird Johnson Wildflower Center database
-          </a>
-          . All 24 species on that list are here.
+          <strong>Websites we used:</strong>
+        </p>
+        <ul className="rules__list">
+          <li>
+            <a href="https://www.wildflower.org/collections/collection.php?collection=xerces_greatlakes">
+              Xerces Society Great Lakes pollinator plant list
+            </a>
+            , the copy in the Lady Bird Johnson Wildflower Center database. The{' '}
+            <strong>Xerces</strong> flag in the tables means a plant is on this
+            list, and all 24 species on it are here.
+          </li>
+        </ul>
+        <p className="rules__lead">
+          That list is the only website we checked the data against. It vouches
+          for a species being a recognised pollinator plant for this region and
+          nothing else. <strong>Every other value in these tables is ours</strong>,
+          from general gardening knowledge rather than one website, including
+          the sun, soil, height, bloom, deer, and salt columns, and the choice
+          of the other 83 plants.
         </p>
         <p className="rules__lead">
-          That flag vouches for the species being a recognised pollinator plant
-          for this region and nothing else. <strong>Every other value in
-          these tables is ours</strong>, including the sun, soil, height,
-          bloom, deer, and salt columns, and the choice of the other 83 plants.
-          Check anything that matters against the{' '}
-          <a href="https://xerces.org">Xerces Society</a>, your state extension
-          office, or a native plant nursery before buying seed.
+          <strong>Good places to check it:</strong>
         </p>
+        <ul className="rules__list">
+          <li>
+            <a href="https://xerces.org">Xerces Society</a>, for pollinator
+            plant lists and advice
+          </li>
+          <li>
+            <a href="https://www.fws.gov/species/rusty-patched-bumble-bee-bombus-affinis">
+              U.S. Fish and Wildlife Service: rusty patched bumble bee
+            </a>
+          </li>
+          <li>
+            <a href="https://www.wildflower.org/plants/">
+              Lady Bird Johnson Wildflower Center plant database
+            </a>
+            , to look up any single plant
+          </li>
+          <li>Your state extension office, or a native plant nursery</li>
+        </ul>
         <p className="rules__lead">
           The files themselves:{' '}
           <a href={`${REPO}/data/plants.js`}>plants.js</a>,{' '}
@@ -391,6 +467,11 @@ export default function DataPage({ onHome }) {
       </section>
 
       <div className="qscreen__nav">
+        {onBackToMixes && (
+          <button type="button" className="btn" onClick={onBackToMixes}>
+            Back to my mixes
+          </button>
+        )}
         <button type="button" className="btn btn--quiet" onClick={onHome}>
           Back to the start
         </button>

@@ -6,7 +6,7 @@ import HomeScreen from './components/HomeScreen.jsx';
 import QuestionScreen from './components/QuestionScreen.jsx';
 import SeedMixResults from './components/SeedMixResults.jsx';
 import { plants } from './data/plants.js';
-import { questions, siteFrom } from './data/questions.js';
+import { questionIds, questions, siteFrom } from './data/questions.js';
 import { recommend } from './lib/recommend.js';
 
 /**
@@ -72,6 +72,10 @@ export default function App() {
 
   const question = questions[index];
 
+  // Someone who opens the data page from their results should be able to get
+  // back to those results, not be dropped at the start with answers wiped.
+  const hasResults = questionIds.every((id) => answers[id]);
+
   return (
     <div className="page">
       {stage !== 'home' && (
@@ -114,7 +118,10 @@ export default function App() {
 
       {stage === 'data' && (
         <main className="main">
-          <DataPage onHome={startOver} />
+          <DataPage
+            onHome={startOver}
+            onBackToMixes={hasResults ? () => goTo('results') : null}
+          />
         </main>
       )}
 
@@ -125,6 +132,7 @@ export default function App() {
             result={result}
             onReview={() => goTo('survey', 0)}
             onRestart={startOver}
+            onSeeData={() => goTo('data')}
           />
         </main>
       )}
