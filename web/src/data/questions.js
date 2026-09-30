@@ -10,9 +10,9 @@
  * There is no question about air humidity. The whole Upper Midwest is humid
  * continental, so it is close to identical everywhere we cover and separates
  * no two plants on this list. What people usually mean by that concern is
- * soil dampness and drainage, which questions 3 and 4 ask properly: how wet
- * the ground stays is a different thing from whether water sits on top of it,
- * and the two rule out different plants.
+ * soil dampness and drainage, which the water question asks properly. Its
+ * last answer, flooding, is a harsher test than damp ground: plenty of plants
+ * want wet soil and still drown when their roots sit underwater for days.
  *
  * Each option carries the facts the matcher needs:
  *   sun / moisture / soil   the condition the plant must tolerate
@@ -26,45 +26,6 @@
  */
 
 export const questions = [
-  {
-    id: 'place',
-    title: 'Where are you planting?',
-    help: 'This tells us about road salt, mowing, and how much room there is.',
-    options: [
-      {
-        value: 'yard',
-        label: 'A yard or garden bed',
-        detail: 'At a house, with normal soil and nobody salting it',
-      },
-      {
-        value: 'school',
-        label: 'School or park grounds',
-        detail: 'Public ground that should look cared for, not overgrown',
-      },
-      {
-        value: 'roadside',
-        label: 'Along a road or sidewalk',
-        detail: 'Gets winter salt spray, which kills most plants',
-        requireSalt: true,
-      },
-      {
-        value: 'raingarden',
-        label: 'A low spot that puddles',
-        detail: 'A ditch or rain garden where water collects after a storm',
-      },
-      {
-        value: 'container',
-        label: 'Pots or a raised bed',
-        detail: 'Roots are boxed in, so tall deep-rooted plants will not work',
-        maxHeight: 2.5,
-      },
-      {
-        value: 'field',
-        label: 'A big open field or farm edge',
-        detail: 'Lots of room, and tall prairie plants are welcome',
-      },
-    ],
-  },
   {
     id: 'sun',
     title: 'How much sun does the spot get?',
@@ -91,49 +52,33 @@ export const questions = [
     ],
   },
   {
-    id: 'moisture',
-    title: 'How wet or dry does the ground stay?',
-    help: 'Think about three days after a big rain. Is it still squishy, or already dusty?',
+    id: 'water',
+    title: 'How wet does the ground get?',
+    help: 'Think about three days after a big storm. Is it dusty, squishy, or still underwater?',
     options: [
-      {
-        value: 'wet',
-        label: 'Wet',
-        detail: 'Stays damp, or sits low where water drains to',
-        moisture: 'wet',
-      },
-      {
-        value: 'medium',
-        label: 'Medium',
-        detail: 'Normal garden ground. Dries out in a drought but is not soggy',
-        moisture: 'medium',
-      },
       {
         value: 'dry',
         label: 'Dry',
         detail: 'Drains fast, bakes in summer, or sits on a slope or sand',
         moisture: 'dry',
       },
-    ],
-  },
-  {
-    id: 'standing',
-    title: 'After a heavy storm, does water sit on top of the ground?',
-    help: 'This is a different question from the last one. Soil can stay damp for weeks and never flood, and a plant that likes damp can still drown.',
-    options: [
       {
-        value: 'none',
-        label: 'No, it soaks in',
-        detail: 'Water disappears into the ground and never pools',
+        value: 'medium',
+        label: 'Medium',
+        detail: 'Normal garden ground. A puddle after a storm is gone by morning',
+        moisture: 'medium',
       },
       {
-        value: 'hours',
-        label: 'It puddles for a few hours',
-        detail: 'A shallow pool that is gone by the next morning. Most plants cope',
+        value: 'damp',
+        label: 'Damp',
+        detail: 'Stays squishy for days, but the water soaks in rather than pooling',
+        moisture: 'wet',
       },
       {
-        value: 'days',
-        label: 'Water sits for days',
-        detail: 'A real pond after a storm. Roots are underwater and most plants rot',
+        value: 'floods',
+        label: 'Floods',
+        detail: 'Water sits on top for days after a storm, like a rain garden or ditch',
+        moisture: 'wet',
         requireStandingWater: true,
       },
     ],
@@ -193,9 +138,10 @@ export const questions = [
     options: [
       {
         value: 'tiny',
-        label: 'A few pots',
-        detail: 'Under about 20 square feet, or a couple of containers',
+        label: 'Pots or a raised bed',
+        detail: 'Under about 20 square feet. Roots are boxed in, so tall plants will not work',
         species: 5,
+        maxHeight: 2.5,
       },
       {
         value: 'small',
@@ -239,6 +185,24 @@ export const questions = [
         label: 'Let them get tall',
         detail: 'Anything goes, including plants taller than you',
         maxHeight: 99,
+      },
+    ],
+  },
+  {
+    id: 'road',
+    title: 'Is it next to a road or sidewalk that gets salted?',
+    help: 'Winter salt splashes several feet off the pavement and kills most plants it lands on.',
+    options: [
+      {
+        value: 'no',
+        label: 'No',
+        detail: 'Nowhere near a salted road or path',
+      },
+      {
+        value: 'yes',
+        label: 'Yes',
+        detail: 'Right beside a road, driveway, or sidewalk that is salted in winter',
+        requireSalt: true,
       },
     ],
   },
@@ -322,7 +286,7 @@ export function siteFrom(answers) {
     if (option.noSpreaders) site.noSpreaders = true;
     if (option.deerPressure) site.deerPressure = true;
     if (option.species) site.species = option.species;
-    // Two questions can cap height: the pot question and the height question.
+    // Two answers can cap height: pots, and the height question itself.
     // The stricter cap wins, because a 6 foot plant in a pot fails either way.
     if (option.maxHeight) site.maxHeight = Math.min(site.maxHeight, option.maxHeight);
   }

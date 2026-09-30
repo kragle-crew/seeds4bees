@@ -16,8 +16,8 @@ const join = (values, table) => values.map((v) => table[v]).join(' ');
 
 const SUN_PHRASE = { sun: 'full sun', part: 'part sun', shade: 'shade' };
 
-/** The questions added most recently, flagged so returning visitors spot them. */
-const NEW_QUESTIONS = new Set(['standing', 'lime', 'spread']);
+/** The questions added or reshaped most recently, flagged so returning visitors spot them. */
+const NEW_QUESTIONS = new Set(['water', 'lime', 'road', 'spread']);
 
 /**
  * What picking one answer actually does to the plant list, read straight off
