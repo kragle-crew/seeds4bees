@@ -6,6 +6,7 @@ import { questions } from '../data/questions.js';
 import { strategies, typicalHeight } from '../lib/recommend.js';
 
 const REPO = 'https://github.com/kragle-crew/seeds4bees/blob/main/web/src';
+const WILDFLOWER = 'https://www.wildflower.org/plants/result.php?id_plant=';
 
 const SUN = { sun: 'Sun', part: 'Part', shade: 'Shade' };
 const WATER = { wet: 'Wet', medium: 'Med', dry: 'Dry' };
@@ -117,6 +118,7 @@ export default function DataPage({ onHome, onBackToMixes }) {
       source: 'https://seeds4bees.net',
       xercesList:
         'https://www.wildflower.org/collections/collection.php?collection=xerces_greatlakes',
+      wildflowerPage: `${WILDFLOWER}<wildflowerId>`,
       exported: new Date().toISOString(),
       natives: plants,
       gardenPlants,
@@ -350,7 +352,13 @@ export default function DataPage({ onHome, onBackToMixes }) {
               {rows.map((plant) => (
                 <tr key={plant.id}>
                   <th scope="row">
-                    {plant.common}
+                    <a
+                      href={`${WILDFLOWER}${plant.wildflowerId}`}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      {plant.common}
+                    </a>
                     <em className="plant__latin">{plant.scientific}</em>
                   </th>
                   <td>{join(plant.sun, SUN)}</td>
@@ -453,7 +461,8 @@ export default function DataPage({ onHome, onBackToMixes }) {
             <a href="https://www.wildflower.org/plants/">
               Lady Bird Johnson Wildflower Center plant database
             </a>
-            , to look up any single plant
+            . Every native plant name in the table above links to its page
+            there, so you can check our row against theirs.
           </li>
           <li>Your state extension office, or a native plant nursery</li>
         </ul>

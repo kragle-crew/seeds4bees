@@ -53,6 +53,11 @@ test('the plant data is internally consistent', () => {
       `${plant.id} has a backwards height range`,
     );
     assert.ok(plant.why, `${plant.id} needs a reason it was chosen`);
+    assert.match(
+      plant.wildflowerId ?? '',
+      /^[A-Z]+[0-9]*$/,
+      `${plant.id} needs its Wildflower Center id so the data page can link it`,
+    );
   }
 });
 
