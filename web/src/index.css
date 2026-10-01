@@ -286,6 +286,25 @@ a {
   font-size: 1rem;
 }
 
+.mix__headrow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+}
+
+/* Doubled class so it beats .btn, which is defined further down. */
+.btn.btn--print {
+  background: var(--honey);
+  border-color: var(--honey);
+  color: #1f1b14;
+}
+
+.btn.btn--print:hover {
+  filter: brightness(1.05);
+}
+
 /* --- what it does for each species --- */
 
 .serves {
@@ -1300,5 +1319,89 @@ a {
   .plant--brief .plant__latin,
   .plant--brief .tag--extra {
     display: none;
+  }
+}
+
+/* --- printing ---
+ *
+ * The shopping list (components/ShoppingList.jsx) sits outside the app's
+ * root. On screen it is hidden; in print it is the only thing shown, in
+ * plain black on white so it reads well on any printer and wastes no ink.
+ */
+
+.printsheet {
+  display: none;
+}
+
+@media print {
+  #root {
+    display: none;
+  }
+
+  body {
+    background: #fff;
+  }
+
+  .printsheet {
+    display: block;
+    color: #000;
+    font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    font-size: 11pt;
+    line-height: 1.4;
+  }
+
+  .printsheet__title {
+    margin: 0 0 0.25rem;
+    font-size: 18pt;
+  }
+
+  .printsheet__lead {
+    margin: 0 0 1rem;
+  }
+
+  .printsheet__warning {
+    margin: 0 0 1rem;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #000;
+  }
+
+  .printsheet__season {
+    margin: 1.1rem 0 0.4rem;
+    font-size: 12pt;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .printsheet__list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .printsheet__item {
+    display: flex;
+    gap: 0.6rem;
+    padding: 0.35rem 0;
+    border-bottom: 1px solid #bbb;
+    break-inside: avoid;
+  }
+
+  .printsheet__box {
+    flex: none;
+    width: 0.9rem;
+    height: 0.9rem;
+    margin-top: 0.15rem;
+    border: 1.5px solid #000;
+  }
+
+  .printsheet__meta {
+    display: block;
+    font-size: 9.5pt;
+    color: #333;
+  }
+
+  .printsheet__tip {
+    margin-top: 1.25rem;
+    font-size: 9.5pt;
   }
 }

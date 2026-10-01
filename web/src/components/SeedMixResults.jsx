@@ -2,6 +2,7 @@ import { useState } from 'react';
 
 import { strategies } from '../lib/recommend.js';
 import More, { usePhone } from './More.jsx';
+import ShoppingList from './ShoppingList.jsx';
 
 const SEASON_LABEL = {
   early: 'Spring',
@@ -242,9 +243,18 @@ export default function SeedMixResults({ result, onReview, onRestart, onSeeData 
               <ServesPanel serves={active.serves} />
             </More>
 
-            <h3 className="mix__heading">
-              {active.picks.length} plants in this mix
-            </h3>
+            <div className="mix__headrow">
+              <h3 className="mix__heading">
+                {active.picks.length} plants in this mix
+              </h3>
+              <button
+                type="button"
+                className="btn btn--print"
+                onClick={() => window.print()}
+              >
+                Print shopping list
+              </button>
+            </div>
 
             <button
               type="button"
@@ -272,6 +282,8 @@ export default function SeedMixResults({ result, onReview, onRestart, onSeeData 
               );
             })}
           </section>
+
+          <ShoppingList mix={active} relaxed={relaxed} />
         </>
       )}
     </div>
