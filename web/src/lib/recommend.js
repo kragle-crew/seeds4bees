@@ -498,8 +498,9 @@ const distinct = (mixes) => {
  *
  * Sun and standing water are never relaxed: getting those wrong does not
  * disappoint somebody, it kills the plant. Salt is relaxed only as a last
- * resort, because no plant here is known to take deep shade and road salt at
- * once, and that combination is a real place somebody might be standing in.
+ * resort, because only one plant here (bush honeysuckle) takes shade and road
+ * salt together, and it wants dry or medium ground. A damp shaded roadside
+ * is a real place somebody might be standing in, and nothing here fits it.
  */
 const RELAXATIONS = [
   { apply: (s) => ({ ...s, deerPressure: false }), note: 'plants that deer may browse' },
@@ -508,10 +509,10 @@ const RELAXATIONS = [
   { apply: (s) => ({ ...s, maxHeight: 99 }), note: 'plants taller than you asked for' },
   { apply: (s) => ({ ...s, soil: null }), note: 'plants suited to a different soil texture' },
   {
-    // Last resort, and only reached by shaded roadsides. Nothing on our list
-    // is documented as handling both deep shade and winter salt, and inventing
-    // a tolerance would be worse than admitting the gap. The note has to carry
-    // real advice, because these plants will die where spray reaches them.
+    // Last resort, and only reached by shaded roadsides that bush honeysuckle
+    // cannot fill. Inventing a salt tolerance would be worse than admitting
+    // the gap. The note has to carry real advice, because these plants will
+    // die where spray reaches them.
     apply: (s) => ({ ...s, requireSalt: false }),
     note: 'plants that cannot take road salt, so keep them well back from the pavement',
   },

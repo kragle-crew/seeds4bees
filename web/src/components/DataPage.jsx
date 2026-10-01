@@ -249,7 +249,7 @@ export default function DataPage({ onHome, onBackToMixes }) {
         <h3 className="rules__title">4. When nothing fits</h3>
         <p className="rules__lead">
           Some honest answers describe a real place our list cannot fill: wet
-          sand in shade kept under two feet, or a shaded roadside. An empty
+          sand in shade kept under two feet, or a damp shaded roadside. An empty
           page teaches nobody anything, so the app loosens the softest
           constraint and tries again, in this order, and tells you every step
           it took.
@@ -262,8 +262,8 @@ export default function DataPage({ onHome, onBackToMixes }) {
           <li>Allow a different soil texture.</li>
           <li>
             Allow plants that cannot take road salt &mdash; reached only by
-            shaded roadsides, because nothing here is documented as taking deep
-            shade and winter salt at once.
+            shaded roadsides, because just one plant here, bush honeysuckle,
+            takes shade and winter salt together, and only on drier ground.
           </li>
         </ol>
         <p className="rules__note">
@@ -439,12 +439,13 @@ export default function DataPage({ onHome, onBackToMixes }) {
           </li>
         </ul>
         <p className="rules__lead">
-          That list is the only website we checked the data against. It vouches
-          for a species being a recognised pollinator plant for this region and
-          nothing else. <strong>Every other value in these tables is ours</strong>,
+          That list vouches for a species being a recognised pollinator plant
+          for this region and nothing else. We also checked every plant name
+          against the Wildflower Center database, and the 54 added most
+          recently against its map of which states each plant grows in. <strong>Every other value in these tables is ours</strong>,
           from general gardening knowledge rather than one website, including
           the sun, soil, height, bloom, deer, and salt columns, and the choice
-          of the other 83 plants.
+          of the other {plants.length - count((p) => p.xercesListed)} plants.
         </p>
         <p className="rules__lead">
           <strong>Good places to check it:</strong>

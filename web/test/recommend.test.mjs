@@ -453,8 +453,9 @@ test('a compromise is always explained, and never invented', () => {
   for (const overrides of [
     // Wet sand in shade, kept short: a real place our list cannot fill.
     { sun: 'shade', water: 'damp', soil: 'sand', height: 'low' },
-    // A shaded roadside: nothing here takes deep shade and road salt at once.
-    { road: 'yes', sun: 'shade', water: 'medium', soil: 'loam' },
+    // A damp, shaded roadside: nothing here takes shade, wet ground, and
+    // road salt at once.
+    { road: 'yes', sun: 'shade', water: 'damp', soil: 'loam' },
   ]) {
     const { pool, mixes, relaxed } = recommend(siteFrom(answers(overrides)));
 
