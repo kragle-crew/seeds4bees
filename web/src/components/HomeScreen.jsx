@@ -45,7 +45,7 @@ export default function HomeScreen({
         </p>
       </header>
 
-      <main className="main">
+      <main className="main home__sections">
         <section>
           <h2 className="section__title">Why these two</h2>
           <p className="intro__text">
