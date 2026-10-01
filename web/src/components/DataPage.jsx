@@ -167,13 +167,11 @@ export default function DataPage({ onHome, onBackToMixes }) {
 
       <section className="rules">
         <h3 className="rules__title">1. The questions, and what each answer does</h3>
-        <More label="What this list shows">
+        <More label={`See all ${questions.length} questions`}>
           <p className="rules__lead">
-            All {questions.length} questions, in the order they are asked. Next to
-            each answer is exactly what it changes about the plant list.
+            In the order they are asked. Next to each answer is exactly what it
+            changes about the plant list.
           </p>
-        </More>
-        <PhoneFold label={`See all ${questions.length} questions`}>
           <ol className="qlist">
             {questions.map((q) => (
               <li key={q.id} className="qlist__item">
@@ -191,7 +189,7 @@ export default function DataPage({ onHome, onBackToMixes }) {
               </li>
             ))}
           </ol>
-        </PhoneFold>
+        </More>
 
         <h3 className="rules__title">2. What gets ruled out</h3>
         <More label="Read the rules">

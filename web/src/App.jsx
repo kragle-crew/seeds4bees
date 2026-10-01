@@ -3,7 +3,6 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import DataPage from './components/DataPage.jsx';
 import FlowerCheck from './components/FlowerCheck.jsx';
 import HomeScreen from './components/HomeScreen.jsx';
-import { PhoneFold } from './components/More.jsx';
 import QuestionScreen from './components/QuestionScreen.jsx';
 import SeedMixResults from './components/SeedMixResults.jsx';
 import { plants } from './data/plants.js';
@@ -137,21 +136,6 @@ export default function App() {
           />
         </main>
       )}
-
-      <footer className="footer">
-        <p>
-          Built by the Kragle Crew &middot;{' '}
-          <a href="https://github.com/kragle-crew/seeds4bees">Source on GitHub</a>{' '}
-          &middot; Hosted on AWS
-        </p>
-        <PhoneFold label="About these suggestions">
-          <p className="footer__note">
-            Plant suggestions are a starting point for the Upper Midwest. Check
-            them against the Xerces Society, your state extension office, or a
-            native plant nursery before you buy seed.
-          </p>
-        </PhoneFold>
-      </footer>
     </div>
   );
 }

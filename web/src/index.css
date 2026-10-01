@@ -93,19 +93,6 @@ body {
   letter-spacing: -0.01em;
 }
 
-/* --- footer --- */
-
-.footer {
-  padding-top: 1.5rem;
-  border-top: 1px solid var(--border);
-  color: var(--ink-soft);
-  font-size: 0.875rem;
-}
-
-.footer p {
-  margin: 0;
-}
-
 a {
   color: var(--honey-deep);
 }
@@ -425,12 +412,6 @@ a {
   color: var(--ink-soft);
   font-size: 0.875rem;
   line-height: 1.5;
-}
-
-.footer__note {
-  margin-top: 0.5rem;
-  font-size: 0.8rem;
-  opacity: 0.8;
 }
 
 /* --- screen flow: home, one question at a time, results --- */
