@@ -1163,6 +1163,55 @@ a {
   color: var(--ink-soft);
 }
 
+/* --- see more ---
+ *
+ * Folds away what most visitors do not need on first look. A button rather
+ * than <details>, so the label can say exactly what will appear.
+ */
+
+.seemore {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0 0 1.5rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--honey-deep);
+  font: inherit;
+  font-size: 0.925rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.seemore::after {
+  content: '';
+  width: 0.45rem;
+  height: 0.45rem;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: translateY(-0.15rem) rotate(45deg);
+  transition: transform 0.15s;
+}
+
+.seemore[aria-expanded='true']::after {
+  transform: translateY(0.1rem) rotate(-135deg);
+}
+
+.seemore:hover {
+  text-decoration: underline;
+}
+
+.seemore:focus-visible {
+  outline: 2px solid var(--honey-deep);
+  outline-offset: 3px;
+  border-radius: 0.25rem;
+}
+
+.mixtabs + .seemore {
+  margin-top: -0.75rem;
+}
+
 /* --- wide screens ---
  *
  * Everything above is laid out for a phone first. On a computer the single

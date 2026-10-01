@@ -8,6 +8,13 @@ const SEASON_LABEL = {
   late: 'Late summer and fall',
 };
 
+/**
+ * How many mixes show before "See more". Five fill one row on a computer,
+ * and the first ones listed are the broadest; the rest are for people who
+ * want something specific.
+ */
+const FIRST_MIXES = 5;
+
 const SEASON_WHY = {
   early: 'Feeds bumble bee queens starting colonies, when little else is open.',
   mid: 'The growing season, and when monarch caterpillars need milkweed leaves.',
@@ -116,8 +123,17 @@ function ServesPanel({ serves }) {
 export default function SeedMixResults({ result, onReview, onRestart, onSeeData }) {
   const { mixes, warnings, pool, relaxed = [] } = result;
   const [activeId, setActiveId] = useState(mixes[0]?.id);
+  const [allMixes, setAllMixes] = useState(false);
+  const [showServes, setShowServes] = useState(false);
 
   const active = mixes.find((m) => m.id === activeId) ?? mixes[0];
+  // The chosen mix stays on screen even after "Show fewer", so the tabs never
+  // hide the one whose plants are listed below them.
+  const shownMixes = allMixes
+    ? mixes
+    : mixes.filter((mix, i) => i < FIRST_MIXES || mix.id === active?.id);
+  const canFold = mixes.length > FIRST_MIXES;
+  const hiddenCount = mixes.length - shownMixes.length;
 
   return (
     <div className="results">
@@ -168,7 +184,7 @@ export default function SeedMixResults({ result, onReview, onRestart, onSeeData 
             <strong>{pool.length}</strong> plants from our list can grow in that
             spot. Here {mixes.length === 1 ? 'is 1 way' : `are ${mixes.length} ways`}{' '}
             to use them.
-            {mixes.length < strategies.length && (
+            {mixes.length < strategies.length && (allMixes || !canFold) && (
               <>
                 {' '}
                 We have {strategies.length} kinds of mix, but for this spot some
@@ -179,7 +195,7 @@ export default function SeedMixResults({ result, onReview, onRestart, onSeeData 
           </p>
 
           <div className="mixtabs" role="tablist" aria-label="Seed mix options">
-            {mixes.map((mix) => (
+            {shownMixes.map((mix) => (
               <button
                 type="button"
                 key={mix.id}
@@ -196,6 +212,19 @@ export default function SeedMixResults({ result, onReview, onRestart, onSeeData 
             ))}
           </div>
 
+          {canFold && (allMixes || hiddenCount > 0) && (
+            <button
+              type="button"
+              className="seemore"
+              aria-expanded={allMixes}
+              onClick={() => setAllMixes(!allMixes)}
+            >
+              {allMixes
+                ? 'Show fewer mixes'
+                : `See ${hiddenCount} more ${hiddenCount === 1 ? 'mix' : 'mixes'}`}
+            </button>
+          )}
+
           <section
             className="mix"
             role="tabpanel"
@@ -204,7 +233,18 @@ export default function SeedMixResults({ result, onReview, onRestart, onSeeData 
           >
             <p className="mix__blurb">{active.blurb}</p>
 
-            <ServesPanel serves={active.serves} />
+            <button
+              type="button"
+              className="seemore"
+              aria-expanded={showServes}
+              onClick={() => setShowServes(!showServes)}
+            >
+              {showServes
+                ? 'Hide the details'
+                : 'See what this mix does for each species'}
+            </button>
+
+            {showServes && <ServesPanel serves={active.serves} />}
 
             <h3 className="mix__heading">
               {active.picks.length} plants in this mix
