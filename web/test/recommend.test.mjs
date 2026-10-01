@@ -15,6 +15,7 @@ import { questions, questionIds, siteFrom } from '../src/data/questions.js';
 import {
   buildMix,
   matchesSite,
+  minimumDifference,
   poolFor,
   recommend,
   strategies,
@@ -222,11 +223,17 @@ test('a mix never exceeds the number of species the area calls for', () => {
   }
 });
 
-test('the easy starter mix only contains forgiving plants', () => {
-  const easy = recommend(sunnyBed).mixes.find((m) => m.id === 'easy-start');
+test('a filtered mix only contains plants that pass its filter', () => {
+  // Built directly, because on some sites the copy check hides these mixes.
+  const pool = poolFor(sunnyBed);
 
-  for (const plant of easy.picks) {
-    assert.ok(plant.easy, `${plant.common} is not a beginner plant`);
+  for (const strategy of strategies.filter((s) => s.filter)) {
+    const { picks } = buildMix(strategy, pool, sunnyBed);
+
+    assert.ok(picks.length > 0, `${strategy.name} found nothing`);
+    for (const plant of picks) {
+      assert.ok(strategy.filter(plant), `${plant.common} slipped into ${strategy.name}`);
+    }
   }
 });
 
@@ -310,21 +317,36 @@ test('every species on the Xerces Great Lakes list is in our data', () => {
   );
 });
 
-test('the same mix is never offered twice under different names', () => {
+test('no mix shown is a copy or near copy of another', () => {
   // A site that suits only a few plants makes every strategy converge.
   const thin = siteFrom(answers({ sun: 'shade', water: 'damp', soil: 'clay', size: 'small', height: 'tall', deer: 'none' }));
+  const field = siteFrom(answers({ size: 'large', height: 'tall' }));
 
-  for (const site of [sunnyBed, thin]) {
+  for (const site of [sunnyBed, thin, field]) {
     const { mixes } = recommend(site);
-    const signatures = mixes.map((m) => m.picks.map((p) => p.id).join(','));
 
-    assert.equal(new Set(signatures).size, mixes.length);
+    mixes.forEach((mix, i) => {
+      for (const earlier of mixes.slice(0, i)) {
+        const ids = new Set(earlier.picks.map((p) => p.id));
+        const different = mix.picks.filter((p) => !ids.has(p.id)).length;
+
+        assert.ok(
+          different >= minimumDifference(mix.picks.length),
+          `${mix.name} is only ${different} plants away from ${earlier.name}`,
+        );
+      }
+    });
   }
 });
 
-test('a site with real variety still gets several different mixes', () => {
+test('mix ids and score column labels are unique', () => {
+  assert.equal(new Set(strategies.map((s) => s.id)).size, strategies.length);
+  assert.equal(new Set(strategies.map((s) => s.short)).size, strategies.length);
+});
+
+test('a site with real variety gets many genuinely different mixes', () => {
   const { mixes } = recommend(sunnyBed);
-  assert.ok(mixes.length > 1, 'a rich site should offer a genuine choice');
+  assert.ok(mixes.length >= 8, `a plain sunny bed only got ${mixes.length} mixes`);
 });
 
 test('standing water is a harsher test than damp soil', () => {

@@ -171,10 +171,9 @@ export default function SeedMixResults({ result, onReview, onRestart, onSeeData 
             {mixes.length < strategies.length && (
               <>
                 {' '}
-                There would normally be {strategies.length}, but with this few
-                plants to choose from every approach lands on nearly the same
-                list, so we show it once instead of pretending there is a
-                choice.
+                We have {strategies.length} kinds of mix, but for this spot some
+                came out nearly the same as another, so we only show the ones
+                that are really different.
               </>
             )}
           </p>

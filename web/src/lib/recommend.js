@@ -95,6 +95,7 @@ export const poolFor = (site, plants = ALL_PLANTS) =>
 
 const isMilkweed = (plant) => plant.monarch === 'host';
 const isGrass = (plant) => plant.type === 'grass';
+const isShrub = (plant) => plant.type === 'shrub';
 
 /**
  * The mix strategies.
@@ -102,7 +103,9 @@ const isGrass = (plant) => plant.type === 'grass';
  * Each is a different opinion about the same patch of ground, which is why
  * the app offers several instead of pretending there is one right answer.
  *
+ *   short    one-word label for the data page's score columns
  *   filter   plants this mix refuses to consider at all
+ *   filterNote  says, in a sentence, what the filter keeps
  *   must     guarantees that get a slot before score is consulted
  *   balance  fill seasons round robin instead of best first
  *   score    ranks whatever is left
@@ -110,6 +113,7 @@ const isGrass = (plant) => plant.type === 'grass';
 export const strategies = [
   {
     id: 'full-season',
+    short: 'Season',
     name: 'Full Season Mix',
     tagline: 'Something blooming from the first warm day to the first frost',
     blurb:
@@ -123,6 +127,7 @@ export const strategies = [
   },
   {
     id: 'monarch',
+    short: 'Monarch',
     name: 'Monarch Mix',
     tagline: 'Built around milkweed, plus fuel for the flight to Mexico',
     blurb:
@@ -136,6 +141,7 @@ export const strategies = [
   },
   {
     id: 'bumble-bee',
+    short: 'Rusty',
     name: 'Rusty Patched Mix',
     tagline: 'Early and late flowers, plus grass to nest under',
     blurb:
@@ -148,6 +154,7 @@ export const strategies = [
   },
   {
     id: 'long-bloom',
+    short: 'Longest',
     name: 'Longest Bloom Mix',
     tagline: 'The fewest plants for the most weeks of flowers',
     blurb:
@@ -160,15 +167,126 @@ export const strategies = [
   },
   {
     id: 'easy-start',
+    short: 'Easy',
     name: 'Easy Starter Mix',
     tagline: 'Forgiving plants you can actually find and afford',
     blurb:
       'Nothing here is fussy, rare, or expensive. Good for a first planting, a school project, or anywhere a failed garden would be discouraging.',
     filter: (plant) => plant.easy,
+    filterNote: 'Considers only plants flagged Easy.',
     must: [isMilkweed],
     score: (plant) =>
       (plant.rustyPatched ? 3 : 0) +
       (plant.monarch === 'host' ? 5 : plant.monarch === 'nectar' ? 2 : 0),
+  },
+  {
+    id: 'spring',
+    short: 'Spring',
+    name: 'Spring Wake-Up Mix',
+    tagline: 'Food for queen bees coming out of hibernation',
+    blurb:
+      'Rusty patched queens wake up in April with no colony and no stored food. Whatever is blooming then decides whether a colony starts at all, so this mix gives spring as much room as the season cap allows.',
+    must: [isMilkweed],
+    score: (plant) =>
+      (plant.season === 'early' ? 8 : 0) +
+      (plant.rustyPatched ? 3 : 0) +
+      (plant.monarch ? 1 : 0),
+  },
+  {
+    id: 'fall',
+    short: 'Fall',
+    name: 'Fall Feast Mix',
+    tagline: 'The last flowers of the year, when little else is open',
+    blurb:
+      'Late bloomers carry new queens into winter and fuel monarchs on the way south. Asters and goldenrods do much of that work, and a garden that goes quiet in August misses it.',
+    must: [isMilkweed],
+    score: (plant) =>
+      (plant.season === 'late' ? 8 : 0) +
+      (plant.rustyPatched ? 3 : 0) +
+      (plant.monarch === 'nectar' ? 2 : 0),
+  },
+  {
+    id: 'xerces',
+    short: 'Xerces',
+    name: 'Expert Picks Mix',
+    tagline: 'Leans on plants the Xerces Society recommends',
+    blurb:
+      'Favors species on the Xerces Society Great Lakes pollinator list, the one part of our data an outside expert vouches for. Choose this if you would rather trust their list than ours.',
+    must: [isMilkweed],
+    score: (plant) =>
+      (plant.xercesListed ? 8 : 0) +
+      (plant.rustyPatched ? 2 : 0) +
+      (plant.monarch ? 1 : 0),
+  },
+  {
+    id: 'short',
+    short: 'Short',
+    name: 'Low and Tidy Mix',
+    tagline: 'Short plants that stay put, for beds people look at',
+    blurb:
+      'The shortest plants that will grow there, preferring ones that do not wander. Good under a window, along a path, or anywhere a neighbor might call tall prairie plants weeds.',
+    must: [isMilkweed],
+    score: (plant) =>
+      Math.round((6 - Math.min(typicalHeight(plant), 6)) * 2) +
+      (plant.spreads ? 0 : 3) +
+      (plant.rustyPatched ? 1 : 0),
+  },
+  {
+    id: 'tall',
+    short: 'Tall',
+    name: 'Tall Prairie Mix',
+    tagline: 'Big, bold plants for a field or the back of a bed',
+    blurb:
+      'The tallest wildflowers and grasses the site allows. Tall prairie plants put out masses of flowers, root deep enough to shrug off drought, and make a screen or a backdrop. Best where nothing needs to be seen over them.',
+    // Shrubs and small trees would win on height alone, and they are not
+    // prairie plants. They have their own mix.
+    filter: (plant) => !isShrub(plant),
+    filterNote: 'Leaves out shrubs and small trees, which have their own mix.',
+    must: [isMilkweed],
+    score: (plant) =>
+      Math.round(Math.min(typicalHeight(plant), 8) * 2) +
+      (plant.rustyPatched ? 2 : 0),
+  },
+  {
+    id: 'meadow',
+    short: 'Meadow',
+    name: 'Meadow Mix',
+    tagline: 'Flowers mixed with native grasses, like a real prairie',
+    blurb:
+      'Prairies are mostly grass. Grasses hold the flowers up, keep out weeds, and give bumble bee queens the soil and thatch they overwinter in. This mix gives grasses real space instead of one token slot.',
+    must: [isGrass, isMilkweed],
+    score: (plant) =>
+      (isGrass(plant) ? 7 : 0) +
+      (plant.rustyPatched ? 3 : 0) +
+      (plant.monarch ? 1 : 0),
+  },
+  {
+    id: 'hedgerow',
+    short: 'Shrubs',
+    name: 'Shrub Border Mix',
+    tagline: 'Flowering shrubs with wildflowers around them',
+    blurb:
+      'Native shrubs flower heavily, live for decades, and give bees shelter from wind. Planted with wildflowers they make a border that blooms on two levels. Only a few of our plants are shrubs, so this mix only differs from the others where they grow.',
+    must: [isShrub, isMilkweed],
+    score: (plant) =>
+      (isShrub(plant) ? 7 : 0) +
+      (plant.rustyPatched ? 3 : 0) +
+      (plant.monarch ? 1 : 0),
+  },
+  {
+    id: 'deer',
+    short: 'Deer',
+    name: 'Deer Tough Mix',
+    tagline: 'Plants deer and rabbits usually leave alone',
+    blurb:
+      'Only plants that deer usually walk past. If you answered that deer visit, every mix already does this; this one is for anyone who is not sure, or whose neighbors complain about deer.',
+    filter: (plant) => plant.deerResistant,
+    filterNote: 'Considers only plants flagged Deer.',
+    must: [isMilkweed],
+    score: (plant) =>
+      (plant.rustyPatched ? 3 : 0) +
+      (plant.monarch === 'host' ? 4 : plant.monarch === 'nectar' ? 2 : 0) +
+      bloomSpan(plant),
   },
 ];
 
@@ -333,21 +451,34 @@ export function warningsFor(pool, site) {
 }
 
 /**
- * Collapses mixes that came out identical.
+ * How many plants a mix must have that an earlier mix does not, to count as
+ * a different mix: a quarter of it, and never fewer than two.
+ *
+ * Swapping one plant out of eight is not a different garden, it is the same
+ * garden with a typo, and listing it as a separate choice would pad the page.
+ */
+export const minimumDifference = (size) => Math.max(2, Math.ceil(size / 4));
+
+/**
+ * Drops mixes that are copies, or near copies, of one already kept.
  *
  * On a site that only suits a handful of plants, every strategy reaches for
  * the same ones and there is genuinely just one answer. Presenting that one
- * answer four times under four names would imply a choice that does not
- * exist. The first strategy to produce a given list keeps it.
+ * answer under several names would imply a choice that does not exist. The
+ * first strategy to produce a given list keeps it.
  */
 const distinct = (mixes) => {
-  const seen = new Set();
+  const kept = [];
 
   return mixes.filter((mix) => {
-    const signature = mix.picks.map((plant) => plant.id).join(',');
-    if (seen.has(signature)) return false;
+    const ids = mix.picks.map((plant) => plant.id);
+    const need = minimumDifference(ids.length);
+    const isCopy = kept.some(
+      (earlier) => ids.filter((id) => !earlier.has(id)).length < need,
+    );
+    if (isCopy) return false;
 
-    seen.add(signature);
+    kept.push(new Set(ids));
     return true;
   });
 };

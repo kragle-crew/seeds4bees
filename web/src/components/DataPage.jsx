@@ -3,7 +3,7 @@ import { useMemo, useState } from 'react';
 import { gardenPlants } from '../data/gardenPlants.js';
 import { plants } from '../data/plants.js';
 import { questions } from '../data/questions.js';
-import { strategies, typicalHeight } from '../lib/recommend.js';
+import { minimumDifference, strategies, typicalHeight } from '../lib/recommend.js';
 
 const REPO = 'https://github.com/kragle-crew/seeds4bees/blob/main/web/src';
 const WILDFLOWER = 'https://www.wildflower.org/plants/result.php?id_plant=';
@@ -232,10 +232,14 @@ export default function DataPage({ onHome, onBackToMixes }) {
             5, 8, 12, or 16 kinds of plant.
           </li>
           <li>
-            <strong>Collapse.</strong> Five strategies run, but mixes that
-            come out identical are shown once. On a site suiting only a handful
-            of plants there is genuinely one answer, and printing it five times
-            under five names would imply a choice that does not exist.
+            <strong>No copies.</strong> {strategies.length} strategies run, but
+            a mix is only shown if enough of its plants are not in any mix
+            already shown: a quarter of them, and at least two (so{' '}
+            {minimumDifference(8)} of 8, or {minimumDifference(16)} of 16).
+            Swapping one plant is not a different garden. On a site suiting
+            only a handful of plants there is genuinely one answer, and
+            printing it under several names would imply a choice that does
+            not exist.
           </li>
         </ol>
         <p className="rules__note">
@@ -276,9 +280,7 @@ export default function DataPage({ onHome, onBackToMixes }) {
               <h4 className="strategy__name">{strategy.name}</h4>
               <p className="strategy__blurb">{strategy.blurb}</p>
               {strategy.filter && (
-                <p className="strategy__filter">
-                  Considers only plants flagged <strong>Easy</strong>.
-                </p>
+                <p className="strategy__filter">{strategy.filterNote}</p>
               )}
             </div>
           ))}
@@ -288,7 +290,7 @@ export default function DataPage({ onHome, onBackToMixes }) {
       <section className="rules">
         <h3 className="rules__title">6. Every plant, every attribute</h3>
         <p className="rules__lead">
-          The last four columns are each mix&rsquo;s score for that plant,
+          The last {strategies.length} columns are each mix&rsquo;s score for that plant,
           computed by calling the same functions the matcher calls. A dash
           means the mix will not consider it at all.
         </p>
@@ -343,7 +345,7 @@ export default function DataPage({ onHome, onBackToMixes }) {
                 <th scope="col">Flags</th>
                 {strategies.map((s) => (
                   <th scope="col" key={s.id} className="num" title={s.name}>
-                    {s.name.split(' ')[0]}
+                    {s.short}
                   </th>
                 ))}
               </tr>
