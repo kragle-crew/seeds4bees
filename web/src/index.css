@@ -269,6 +269,55 @@ a {
   line-height: 1.4;
 }
 
+/* --- the data page's three parts --- */
+
+.groups {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 0.6rem;
+  margin: 1.25rem 0 1.75rem;
+}
+
+.group {
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 0.6rem;
+  background: var(--surface);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.group:hover {
+  border-color: var(--honey);
+}
+
+.group:focus-visible {
+  outline: 2px solid var(--honey-deep);
+  outline-offset: 2px;
+}
+
+.group--on {
+  border-color: var(--leaf);
+  background: color-mix(in srgb, var(--leaf) 10%, var(--surface));
+  box-shadow: inset 0 0 0 1px var(--leaf);
+}
+
+.group__name {
+  display: block;
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.group__about {
+  display: block;
+  margin-top: 0.2rem;
+  color: var(--ink-soft);
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+
 .mix {
   padding: 1.4rem;
   border: 1px solid var(--border);
