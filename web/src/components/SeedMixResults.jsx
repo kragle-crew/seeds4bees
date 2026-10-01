@@ -1,6 +1,7 @@
 import { useState } from 'react';
 
 import { strategies } from '../lib/recommend.js';
+import More from './More.jsx';
 
 const SEASON_LABEL = {
   early: 'Spring',
@@ -22,7 +23,7 @@ const SEASON_WHY = {
 };
 
 /** One plant, with the reason it was chosen rather than just its name. */
-function PlantRow({ plant }) {
+function PlantRow({ plant, showWhy }) {
   return (
     <li className="plant">
       <div className="plant__head">
@@ -48,7 +49,7 @@ function PlantRow({ plant }) {
         )}
       </div>
 
-      <p className="plant__why">{plant.why}</p>
+      {showWhy && <p className="plant__why">{plant.why}</p>}
     </li>
   );
 }
@@ -124,7 +125,7 @@ export default function SeedMixResults({ result, onReview, onRestart, onSeeData 
   const { mixes, warnings, pool, relaxed = [] } = result;
   const [activeId, setActiveId] = useState(mixes[0]?.id);
   const [allMixes, setAllMixes] = useState(false);
-  const [showServes, setShowServes] = useState(false);
+  const [showWhy, setShowWhy] = useState(false);
 
   const active = mixes.find((m) => m.id === activeId) ?? mixes[0];
   // The chosen mix stays on screen even after "Show fewer", so the tabs never
@@ -231,24 +232,24 @@ export default function SeedMixResults({ result, onReview, onRestart, onSeeData 
             id={`panel-${active.id}`}
             aria-labelledby={`tab-${active.id}`}
           >
-            <p className="mix__blurb">{active.blurb}</p>
-
-            <button
-              type="button"
-              className="seemore"
-              aria-expanded={showServes}
-              onClick={() => setShowServes(!showServes)}
-            >
-              {showServes
-                ? 'Hide the details'
-                : 'See what this mix does for each species'}
-            </button>
-
-            {showServes && <ServesPanel serves={active.serves} />}
+            {/* Keyed so switching mixes folds the description back up. */}
+            <More key={active.id} label="About this mix">
+              <p className="mix__blurb">{active.blurb}</p>
+              <ServesPanel serves={active.serves} />
+            </More>
 
             <h3 className="mix__heading">
               {active.picks.length} plants in this mix
             </h3>
+
+            <button
+              type="button"
+              className="seemore seemore--under"
+              aria-expanded={showWhy}
+              onClick={() => setShowWhy(!showWhy)}
+            >
+              {showWhy ? 'Hide the reasons' : 'Show why each plant was picked'}
+            </button>
 
             {['early', 'mid', 'late'].map((season) => {
               const inSeason = active.picks.filter((p) => p.season === season);
@@ -257,10 +258,10 @@ export default function SeedMixResults({ result, onReview, onRestart, onSeeData 
               return (
                 <div className="season" key={season}>
                   <h4 className="season__title">{SEASON_LABEL[season]}</h4>
-                  <p className="season__why">{SEASON_WHY[season]}</p>
+                  {showWhy && <p className="season__why">{SEASON_WHY[season]}</p>}
                   <ul className="plants">
                     {inSeason.map((plant) => (
-                      <PlantRow key={plant.id} plant={plant} />
+                      <PlantRow key={plant.id} plant={plant} showWhy={showWhy} />
                     ))}
                   </ul>
                 </div>

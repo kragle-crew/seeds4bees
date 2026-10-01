@@ -1,3 +1,5 @@
+import More from './More.jsx';
+
 /**
  * The landing screen.
  *
@@ -48,44 +50,48 @@ export default function HomeScreen({
       <main className="main home__sections">
         <section>
           <h2 className="section__title">Why these two</h2>
-          <p className="intro__text">
-            The rusty patched bumble bee was once common across the Upper
-            Midwest and is now endangered, surviving in a fraction of its old
-            range. The monarch butterfly makes a migration to Mexico that takes
-            several generations, and its caterpillars can eat only milkweed.
-            Both are running out of places to eat and nest, and both can be
-            helped by an ordinary yard planted on purpose.
-          </p>
+          <More label="Read why these two">
+            <p className="intro__text">
+              The rusty patched bumble bee was once common across the Upper
+              Midwest and is now endangered, surviving in a fraction of its old
+              range. The monarch butterfly makes a migration to Mexico that takes
+              several generations, and its caterpillars can eat only milkweed.
+              Both are running out of places to eat and nest, and both can be
+              helped by an ordinary yard planted on purpose.
+            </p>
+          </More>
         </section>
 
         <section>
           <h2 className="section__title">How it works</h2>
-          <ol className="how">
-            <li>
-              <strong>You answer questions about your spot.</strong> Sun, water,
-              soil, size, and what else lives there.
-            </li>
-            <li>
-              <strong>We rule out what would die.</strong> Only plants that can
-              survive those exact conditions stay in.
-            </li>
-            <li>
-              <strong>We build mixes that bloom all season.</strong> Bumble bee
-              queens fly in April and workers are still out in October, so a
-              garden that only blooms in July leaves them hungry at both ends.
-            </li>
-            <li>
-              <strong>Every mix includes milkweed when it can.</strong> Monarch
-              caterpillars eat nothing else.
-            </li>
-          </ol>
-          <p className="how__note">
-            Our list has {plantCount} native plants of the Upper Midwest.{' '}
-            <button type="button" className="linkish" onClick={onSeeData}>
-              See the data behind the mixes
-            </button>{' '}
-            to check any of it yourself.
-          </p>
+          <More label="Read how it works">
+            <ol className="how">
+              <li>
+                <strong>You answer questions about your spot.</strong> Sun, water,
+                soil, size, and what else lives there.
+              </li>
+              <li>
+                <strong>We rule out what would die.</strong> Only plants that can
+                survive those exact conditions stay in.
+              </li>
+              <li>
+                <strong>We build mixes that bloom all season.</strong> Bumble bee
+                queens fly in April and workers are still out in October, so a
+                garden that only blooms in July leaves them hungry at both ends.
+              </li>
+              <li>
+                <strong>Every mix includes milkweed when it can.</strong> Monarch
+                caterpillars eat nothing else.
+              </li>
+            </ol>
+            <p className="how__note">
+              Our list has {plantCount} native plants of the Upper Midwest.{' '}
+              <button type="button" className="linkish" onClick={onSeeData}>
+                See the data behind the mixes
+              </button>{' '}
+              to check any of it yourself.
+            </p>
+          </More>
         </section>
       </main>
     </>

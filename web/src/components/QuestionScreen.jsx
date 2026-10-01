@@ -1,3 +1,5 @@
+import More from './More.jsx';
+
 /**
  * One question, on its own screen.
  *
@@ -40,7 +42,10 @@ export default function QuestionScreen({
       </div>
 
       <h2 className="qscreen__title">{question.title}</h2>
-      <p className="qscreen__help">{question.help}</p>
+      {/* Keyed so the tip folds back up on each new question. */}
+      <More key={question.id} label="Help me answer">
+        <p className="qscreen__help">{question.help}</p>
+      </More>
 
       <div className="options">
         {question.options.map((option) => {

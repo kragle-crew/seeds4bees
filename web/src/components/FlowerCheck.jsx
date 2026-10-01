@@ -1,6 +1,7 @@
 import { useState } from 'react';
 
 import { featured, helpsWith, search, swapFor } from '../lib/lookup.js';
+import More from './More.jsx';
 
 const VERDICT = {
   great: { label: 'Excellent for both', tone: 'great' },
@@ -65,8 +66,9 @@ function PlantVerdict({ entry }) {
       </div>
 
       <div className="verdict__care">
-        <h4 className="verdict__caption">Where it wants to live</h4>
-        <p>{entry.care}</p>
+        <More label="Where it wants to live">
+          <p>{entry.care}</p>
+        </More>
       </div>
 
       {swap && (
@@ -77,12 +79,14 @@ function PlantVerdict({ entry }) {
           <p className="swap__name">
             {swap.common} <em className="plant__latin">{swap.scientific}</em>
           </p>
-          <p className="swap__why">{swap.summary}</p>
-          <p className="swap__care">{swap.care}</p>
-          <p className="swap__note">
-            You do not have to dig anything up. Adding one of these alongside
-            what you already have is enough.
-          </p>
+          <More label="Why this one">
+            <p className="swap__why">{swap.summary}</p>
+            <p className="swap__care">{swap.care}</p>
+            <p className="swap__note">
+              You do not have to dig anything up. Adding one of these alongside
+              what you already have is enough.
+            </p>
+          </More>
         </div>
       )}
     </div>
@@ -149,7 +153,7 @@ export default function FlowerCheck({ onHome }) {
         </p>
       )}
 
-      {selected && <PlantVerdict entry={selected} />}
+      {selected && <PlantVerdict key={selected.id} entry={selected} />}
 
       <div className="qscreen__nav">
         <button type="button" className="btn btn--quiet" onClick={onHome}>

@@ -1208,6 +1208,26 @@ a {
   border-radius: 0.25rem;
 }
 
+.more {
+  margin: 0 0 1.25rem;
+}
+
+.more > .seemore {
+  margin: 0;
+}
+
+.more__body {
+  margin-top: 0.75rem;
+}
+
+.more__body > :last-child {
+  margin-bottom: 0;
+}
+
+.seemore--under {
+  margin: 0.5rem 0 0.5rem;
+}
+
 .mixtabs + .seemore {
   margin-top: -0.75rem;
 }
