@@ -1275,3 +1275,49 @@ a {
     break-inside: avoid;
   }
 }
+
+/* --- phones ---
+ *
+ * The mirror of the wide-screen block: on a small screen, anything that
+ * pushes the plant list down or wraps onto extra lines gets folded or
+ * trimmed. The breakpoint matches usePhone() in components/More.jsx.
+ */
+
+@media (max-width: 40rem) {
+  /* Three buttons on one line instead of wrapping onto two. */
+  .results__actions {
+    gap: 0.35rem;
+  }
+
+  .results__actions .btn {
+    padding: 0.45rem 0.75rem;
+    font-size: 0.82rem;
+  }
+
+  /* Mix names two across, without taglines: five mixes in three short
+     rows instead of a full screen. The chosen mix's description is under
+     "About this mix". */
+  .mixtabs {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.45rem;
+  }
+
+  .mixtab {
+    padding: 0.6rem 0.7rem;
+  }
+
+  .mixtab__name {
+    font-size: 0.875rem;
+  }
+
+  .mixtab__tagline {
+    display: none;
+  }
+
+  /* Plant cards show the name, bloom time, and milkweed tag until
+     "Show details" is on. */
+  .plant--brief .plant__latin,
+  .plant--brief .tag--extra {
+    display: none;
+  }
+}

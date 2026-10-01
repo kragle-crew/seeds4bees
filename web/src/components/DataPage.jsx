@@ -3,7 +3,7 @@ import { useMemo, useState } from 'react';
 import { gardenPlants } from '../data/gardenPlants.js';
 import { plants } from '../data/plants.js';
 import { questions } from '../data/questions.js';
-import More from './More.jsx';
+import More, { PhoneFold } from './More.jsx';
 import { minimumDifference, strategies, typicalHeight } from '../lib/recommend.js';
 
 const REPO = 'https://github.com/kragle-crew/seeds4bees/blob/main/web/src';
@@ -173,23 +173,25 @@ export default function DataPage({ onHome, onBackToMixes }) {
             each answer is exactly what it changes about the plant list.
           </p>
         </More>
-        <ol className="qlist">
-          {questions.map((q) => (
-            <li key={q.id} className="qlist__item">
-              <strong>{q.title}</strong>
-              {NEW_QUESTIONS.has(q.id) && (
-                <span className="tag tag--new">New</span>
-              )}
-              <ul className="qlist__options">
-                {q.options.map((o) => (
-                  <li key={o.value}>
-                    {o.label}: <span className="qlist__effect">{effectOf(o)}</span>
-                  </li>
-                ))}
-              </ul>
-            </li>
-          ))}
-        </ol>
+        <PhoneFold label={`See all ${questions.length} questions`}>
+          <ol className="qlist">
+            {questions.map((q) => (
+              <li key={q.id} className="qlist__item">
+                <strong>{q.title}</strong>
+                {NEW_QUESTIONS.has(q.id) && (
+                  <span className="tag tag--new">New</span>
+                )}
+                <ul className="qlist__options">
+                  {q.options.map((o) => (
+                    <li key={o.value}>
+                      {o.label}: <span className="qlist__effect">{effectOf(o)}</span>
+                    </li>
+                  ))}
+                </ul>
+              </li>
+            ))}
+          </ol>
+        </PhoneFold>
 
         <h3 className="rules__title">2. What gets ruled out</h3>
         <More label="Read the rules">
@@ -312,98 +314,100 @@ export default function DataPage({ onHome, onBackToMixes }) {
           </p>
         </More>
 
-        <div className="datacontrols">
-          <input
-            type="search"
-            className="searchbox"
-            placeholder="Filter by name..."
-            aria-label="Filter plants by name"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-          />
-          <label className="check">
+        <PhoneFold label={`Show all ${plants.length} plants`}>
+          <div className="datacontrols">
             <input
-              type="checkbox"
-              checked={xercesOnly}
-              onChange={(e) => setXercesOnly(e.target.checked)}
+              type="search"
+              className="searchbox"
+              placeholder="Filter by name..."
+              aria-label="Filter plants by name"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
             />
-            Xerces-listed only
-          </label>
-          <label className="check">
-            Sort
-            <select value={sort} onChange={(e) => setSort(e.target.value)}>
-              <option value="name">by name</option>
-              <option value="season">by season</option>
-              <option value="height">by height</option>
-            </select>
-          </label>
-          <button type="button" className="btn" onClick={download}>
-            Download JSON
-          </button>
-        </div>
+            <label className="check">
+              <input
+                type="checkbox"
+                checked={xercesOnly}
+                onChange={(e) => setXercesOnly(e.target.checked)}
+              />
+              Xerces-listed only
+            </label>
+            <label className="check">
+              Sort
+              <select value={sort} onChange={(e) => setSort(e.target.value)}>
+                <option value="name">by name</option>
+                <option value="season">by season</option>
+                <option value="height">by height</option>
+              </select>
+            </label>
+            <button type="button" className="btn" onClick={download}>
+              Download JSON
+            </button>
+          </div>
 
-        <p className="rules__note">
-          Showing {rows.length} of {plants.length}.
-        </p>
+          <p className="rules__note">
+            Showing {rows.length} of {plants.length}.
+          </p>
 
-        <div className="tablewrap">
-          <table className="datatable">
-            <thead>
-              <tr>
-                <th scope="col">Plant</th>
-                <th scope="col">Sun</th>
-                <th scope="col">Water</th>
-                <th scope="col">Soil</th>
-                <th scope="col">Height</th>
-                <th scope="col">Season</th>
-                <th scope="col">Bloom</th>
-                <th scope="col">Monarch</th>
-                <th scope="col">RPBB</th>
-                <th scope="col">Flags</th>
-                {strategies.map((s) => (
-                  <th scope="col" key={s.id} className="num" title={s.name}>
-                    {s.short}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((plant) => (
-                <tr key={plant.id}>
-                  <th scope="row">
-                    <a
-                      href={`${WILDFLOWER}${plant.wildflowerId}`}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      {plant.common}
-                    </a>
-                    <em className="plant__latin">{plant.scientific}</em>
-                  </th>
-                  <td>{join(plant.sun, SUN)}</td>
-                  <td>{join(plant.moisture, WATER)}</td>
-                  <td>{join(plant.soil, SOIL)}</td>
-                  <td>
-                    {plant.height[0]}&ndash;{plant.height[1]}
-                    <span className="muted"> ({typicalHeight(plant)})</span>
-                  </td>
-                  <td>{SEASON[plant.season]}</td>
-                  <td>{plant.bloom}</td>
-                  <td>{plant.monarch === 'host' ? 'Host' : plant.monarch === 'nectar' ? 'Nectar' : '—'}</td>
-                  <td>{plant.rustyPatched ? 'Yes' : '—'}</td>
-                  <td>
-                    <Flags plant={plant} />
-                  </td>
+          <div className="tablewrap">
+            <table className="datatable">
+              <thead>
+                <tr>
+                  <th scope="col">Plant</th>
+                  <th scope="col">Sun</th>
+                  <th scope="col">Water</th>
+                  <th scope="col">Soil</th>
+                  <th scope="col">Height</th>
+                  <th scope="col">Season</th>
+                  <th scope="col">Bloom</th>
+                  <th scope="col">Monarch</th>
+                  <th scope="col">RPBB</th>
+                  <th scope="col">Flags</th>
                   {strategies.map((s) => (
-                    <td key={s.id} className="num">
-                      {s.filter && !s.filter(plant) ? '—' : s.score(plant)}
-                    </td>
+                    <th scope="col" key={s.id} className="num" title={s.name}>
+                      {s.short}
+                    </th>
                   ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {rows.map((plant) => (
+                  <tr key={plant.id}>
+                    <th scope="row">
+                      <a
+                        href={`${WILDFLOWER}${plant.wildflowerId}`}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        {plant.common}
+                      </a>
+                      <em className="plant__latin">{plant.scientific}</em>
+                    </th>
+                    <td>{join(plant.sun, SUN)}</td>
+                    <td>{join(plant.moisture, WATER)}</td>
+                    <td>{join(plant.soil, SOIL)}</td>
+                    <td>
+                      {plant.height[0]}&ndash;{plant.height[1]}
+                      <span className="muted"> ({typicalHeight(plant)})</span>
+                    </td>
+                    <td>{SEASON[plant.season]}</td>
+                    <td>{plant.bloom}</td>
+                    <td>{plant.monarch === 'host' ? 'Host' : plant.monarch === 'nectar' ? 'Nectar' : '—'}</td>
+                    <td>{plant.rustyPatched ? 'Yes' : '—'}</td>
+                    <td>
+                      <Flags plant={plant} />
+                    </td>
+                    {strategies.map((s) => (
+                      <td key={s.id} className="num">
+                        {s.filter && !s.filter(plant) ? '—' : s.score(plant)}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </PhoneFold>
       </section>
 
       <section className="rules">
@@ -413,33 +417,35 @@ export default function DataPage({ onHome, onBackToMixes }) {
             These drive the flower checker rather than the mixes.
           </p>
         </More>
-        <div className="tablewrap">
-          <table className="datatable">
-            <thead>
-              <tr>
-                <th scope="col">Plant</th>
-                <th scope="col">Verdict</th>
-                <th scope="col">Monarch</th>
-                <th scope="col">RPBB</th>
-                <th scope="col">Suggested native</th>
-              </tr>
-            </thead>
-            <tbody>
-              {gardenPlants.map((g) => (
-                <tr key={g.id}>
-                  <th scope="row">
-                    {g.common}
-                    <em className="plant__latin">{g.scientific}</em>
-                  </th>
-                  <td>{g.verdict}</td>
-                  <td>{g.monarch === 'host' ? 'Host' : g.monarch === 'nectar' ? 'Nectar' : '—'}</td>
-                  <td>{g.rustyPatched ? 'Yes' : '—'}</td>
-                  <td>{g.swap ?? '—'}</td>
+        <PhoneFold label={`Show all ${gardenPlants.length} garden plants`}>
+          <div className="tablewrap">
+            <table className="datatable">
+              <thead>
+                <tr>
+                  <th scope="col">Plant</th>
+                  <th scope="col">Verdict</th>
+                  <th scope="col">Monarch</th>
+                  <th scope="col">RPBB</th>
+                  <th scope="col">Suggested native</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {gardenPlants.map((g) => (
+                  <tr key={g.id}>
+                    <th scope="row">
+                      {g.common}
+                      <em className="plant__latin">{g.scientific}</em>
+                    </th>
+                    <td>{g.verdict}</td>
+                    <td>{g.monarch === 'host' ? 'Host' : g.monarch === 'nectar' ? 'Nectar' : '—'}</td>
+                    <td>{g.rustyPatched ? 'Yes' : '—'}</td>
+                    <td>{g.swap ?? '—'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </PhoneFold>
       </section>
 
       <section className="rules">

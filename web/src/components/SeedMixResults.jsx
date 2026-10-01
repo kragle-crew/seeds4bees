@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
 import { strategies } from '../lib/recommend.js';
-import More from './More.jsx';
+import More, { usePhone } from './More.jsx';
 
 const SEASON_LABEL = {
   early: 'Spring',
@@ -25,7 +25,9 @@ const SEASON_WHY = {
 /** One plant, with the reason it was chosen rather than just its name. */
 function PlantRow({ plant, showWhy }) {
   return (
-    <li className="plant">
+    // Brief cards drop the secondary tags and the Latin name on a phone, where
+    // they wrap onto three or four lines per plant. See index.css.
+    <li className={`plant${showWhy ? '' : ' plant--brief'}`}>
       <div className="plant__head">
         <span className="plant__common">{plant.common}</span>
         <em className="plant__latin">{plant.scientific}</em>
@@ -33,17 +35,17 @@ function PlantRow({ plant, showWhy }) {
 
       <div className="plant__tags">
         <span className="tag tag--bloom">Blooms {plant.bloom}</span>
-        <span className="tag">
+        <span className="tag tag--extra">
           {plant.height[0]}&ndash;{plant.height[1]} ft
         </span>
         {plant.monarch === 'host' && (
           <span className="tag tag--monarch">Monarch caterpillar food</span>
         )}
-        {plant.monarch === 'nectar' && <span className="tag tag--monarch">Monarch nectar</span>}
-        {plant.rustyPatched && <span className="tag tag--bee">Rusty patched favorite</span>}
-        {plant.type === 'grass' && <span className="tag tag--nest">Nesting cover</span>}
+        {plant.monarch === 'nectar' && <span className="tag tag--monarch tag--extra">Monarch nectar</span>}
+        {plant.rustyPatched && <span className="tag tag--bee tag--extra">Rusty patched favorite</span>}
+        {plant.type === 'grass' && <span className="tag tag--nest tag--extra">Nesting cover</span>}
         {plant.xercesListed && (
-          <span className="tag tag--xerces" title="Appears on the Xerces Society Great Lakes pollinator plant list">
+          <span className="tag tag--xerces tag--extra" title="Appears on the Xerces Society Great Lakes pollinator plant list">
             Xerces list
           </span>
         )}
@@ -126,6 +128,7 @@ export default function SeedMixResults({ result, onReview, onRestart, onSeeData 
   const [activeId, setActiveId] = useState(mixes[0]?.id);
   const [allMixes, setAllMixes] = useState(false);
   const [showWhy, setShowWhy] = useState(false);
+  const phone = usePhone();
 
   const active = mixes.find((m) => m.id === activeId) ?? mixes[0];
   // The chosen mix stays on screen even after "Show fewer", so the tabs never
@@ -139,11 +142,12 @@ export default function SeedMixResults({ result, onReview, onRestart, onSeeData 
   return (
     <div className="results">
       <div className="results__actions">
+        {/* Shorter labels on a phone keep all three on one line. */}
         <button type="button" className="btn" onClick={onReview}>
-          Change my answers
+          {phone ? 'Change answers' : 'Change my answers'}
         </button>
         <button type="button" className="btn btn--quiet" onClick={onSeeData}>
-          See the raw data
+          {phone ? 'Raw data' : 'See the raw data'}
         </button>
         <button type="button" className="btn btn--quiet" onClick={onRestart}>
           Start over
@@ -248,7 +252,7 @@ export default function SeedMixResults({ result, onReview, onRestart, onSeeData 
               aria-expanded={showWhy}
               onClick={() => setShowWhy(!showWhy)}
             >
-              {showWhy ? 'Hide the reasons' : 'Show why each plant was picked'}
+              {showWhy ? 'Hide the details' : 'Show details for each plant'}
             </button>
 
             {['early', 'mid', 'late'].map((season) => {

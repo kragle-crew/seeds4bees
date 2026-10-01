@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 /**
  * Explanatory text, folded away until somebody asks for it.
@@ -23,4 +23,36 @@ export default function More({ label, children }) {
       {open && <div className="more__body">{children}</div>}
     </div>
   );
+}
+
+/** Matches the phone breakpoint in index.css. */
+const PHONE = '(max-width: 40rem)';
+
+/**
+ * True on a phone-sized screen, and kept up to date if the window is resized
+ * or the phone is turned sideways.
+ */
+export function usePhone() {
+  const [phone, setPhone] = useState(() => window.matchMedia(PHONE).matches);
+
+  useEffect(() => {
+    const query = window.matchMedia(PHONE);
+    const update = () => setPhone(query.matches);
+
+    query.addEventListener('change', update);
+    return () => query.removeEventListener('change', update);
+  }, []);
+
+  return phone;
+}
+
+/**
+ * Folded on a phone, open on a computer.
+ *
+ * For things that are useful to see at a glance on a big screen but push
+ * everything else several screens down on a small one: long lists, wide
+ * tables, and fine print.
+ */
+export function PhoneFold({ label, children }) {
+  return usePhone() ? <More label={label}>{children}</More> : children;
 }
