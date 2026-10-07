@@ -1,5 +1,57 @@
 import More from './More.jsx';
 
+const COMMONS = 'https://commons.wikimedia.org/wiki/File:';
+
+/**
+ * The few facts someone should know before answering the questions, kept
+ * short enough to read at a glance.
+ *
+ * Facts come from the U.S. Fish and Wildlife Service pages for each species.
+ * The photos are public domain, from Wikimedia Commons, and are saved in
+ * public/img so the page does not depend on another site to load.
+ */
+const FACTS = [
+  {
+    title: 'Rusty patched bumble bee',
+    image: '/img/bee.jpg',
+    alt: 'A rusty patched bumble bee feeding on a purple wild bergamot flower',
+    points: [
+      'Listed as endangered in 2017, the first bumble bee in the U.S. to be listed.',
+      'Workers have a rusty patch of hair on their back, which gives the bee its name.',
+      'Nests underground, often in old mouse burrows.',
+      'Needs flowers from April to October. More pollen means a colony raises more new queens.',
+    ],
+    credit: 'Jill Utrup, USFWS (public domain)',
+    creditUrl: `${COMMONS}Rusty-patched_bumble_bee_wild_bergamot.png`,
+  },
+  {
+    title: 'Monarch butterfly',
+    image: '/img/monarch.jpg',
+    alt: 'An orange and black monarch butterfly hanging from pink common milkweed flowers',
+    points: [
+      'Flies from as far as Canada to the mountains of central Mexico for the winter.',
+      'Its caterpillars eat only milkweed, and nothing else.',
+      'Proposed as a threatened species in 2024.',
+      'Eastern monarchs have a 56 to 74 percent chance of dying out by 2080.',
+    ],
+    credit: 'USFWS Midwest Region (public domain)',
+    creditUrl: `${COMMONS}Monarch_butterfly_on_common_milkweed_(48372505506).jpg`,
+  },
+  {
+    title: 'How a yard helps',
+    image: '/img/bergamot.jpg',
+    alt: 'A close-up of a lavender wild bergamot flower',
+    points: [
+      'Plant flowers that bloom in spring, summer, and fall, so there is always food.',
+      'Add milkweed so monarchs have a place to lay eggs.',
+      'Choose native plants. They grow well here and feed the insects that live here.',
+      'Leave some bare ground and fallen leaves, where queens nest and spend the winter.',
+    ],
+    credit: 'Jasper Shide (public domain, CC0)',
+    creditUrl: `${COMMONS}Monarda_fistulosa_-_Wild_Bergamot_(Flower).jpg`,
+  },
+];
+
 /**
  * The landing screen.
  *
@@ -47,19 +99,37 @@ export default function HomeScreen({
         </p>
       </header>
 
-      <main className="main home__sections">
+      <main className="main">
         <section>
-          <h2 className="section__title">Why these two</h2>
-          <More label="Read why these two">
-            <p className="intro__text">
-              The rusty patched bumble bee was once common across the Upper
-              Midwest and is now endangered, surviving in a fraction of its old
-              range. The monarch butterfly makes a migration to Mexico that takes
-              several generations, and its caterpillars can eat only milkweed.
-              Both are running out of places to eat and nest, and both can be
-              helped by an ordinary yard planted on purpose.
-            </p>
-          </More>
+          <h2 className="section__title">Quick facts</h2>
+          <div className="facts">
+            {FACTS.map((fact) => (
+              <article key={fact.title} className="fact">
+                <img
+                  className="fact__img"
+                  src={fact.image}
+                  alt={fact.alt}
+                  width="960"
+                  height="640"
+                  loading="lazy"
+                />
+                <div className="fact__body">
+                  <h3 className="fact__title">{fact.title}</h3>
+                  <ul className="fact__list">
+                    {fact.points.map((point) => (
+                      <li key={point}>{point}</li>
+                    ))}
+                  </ul>
+                  <p className="fact__credit">
+                    Photo:{' '}
+                    <a href={fact.creditUrl} target="_blank" rel="noreferrer">
+                      {fact.credit}
+                    </a>
+                  </p>
+                </div>
+              </article>
+            ))}
+          </div>
         </section>
 
         <section>

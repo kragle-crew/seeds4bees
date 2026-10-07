@@ -132,6 +132,60 @@ a {
   max-width: 60ch;
 }
 
+/* --- quick facts on the home screen --- */
+
+.facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  gap: 1rem;
+}
+
+.fact {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+}
+
+.fact__img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 3 / 2;
+  object-fit: cover;
+}
+
+.fact__body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  padding: 1rem 1.1rem 0.9rem;
+}
+
+.fact__title {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+}
+
+.fact__list {
+  margin: 0 0 0.75rem;
+  padding-left: 1.1rem;
+  color: var(--ink-soft);
+  font-size: 0.925rem;
+}
+
+.fact__list li + li {
+  margin-top: 0.3rem;
+}
+
+.fact__credit {
+  margin: auto 0 0;
+  color: var(--ink-soft);
+  font-size: 0.75rem;
+}
+
 /* --- the survey --- */
 
 .options {
@@ -485,7 +539,84 @@ a {
 /* --- screen flow: home, one question at a time, results --- */
 
 .topbar {
-  padding: 1.5rem 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.25rem 0 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.homebtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.3rem 0.6rem 1.05rem;
+  border: 0;
+  border-radius: 999px;
+  background: var(--honey);
+  color: #1f1b14;
+  font: inherit;
+  font-size: 1.05rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: filter 0.12s;
+}
+
+.homebtn:hover {
+  filter: brightness(1.07);
+}
+
+.homebtn:focus-visible {
+  outline: 2px solid var(--honey-deep);
+  outline-offset: 3px;
+}
+
+/* --- asking before leaving the questions --- */
+
+.leave {
+  width: min(26rem, calc(100vw - 2rem));
+  padding: 1.5rem;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface);
+  color: var(--ink);
+}
+
+.leave::backdrop {
+  background: rgb(0 0 0 / 0.55);
+}
+
+.leave__title {
+  margin: 0 0 0.5rem;
+  font-size: 1.2rem;
+}
+
+.leave__text {
+  margin: 0 0 1.25rem;
+  color: var(--ink-soft);
+}
+
+.leave__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.btn.btn--stay {
+  border-color: var(--honey);
+  background: var(--honey);
+  color: #1f1b14;
+}
+
+.homebtn__icon {
+  width: 1.35rem;
+  height: 1.35rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .wordmark {
@@ -494,7 +625,7 @@ a {
   background: none;
   color: inherit;
   font: inherit;
-  font-size: 1.25rem;
+  font-size: 1.6rem;
   font-weight: 800;
   letter-spacing: -0.02em;
   cursor: pointer;
@@ -1298,17 +1429,6 @@ a {
 
   .hero__tagline {
     max-width: 44ch;
-  }
-
-  .home__sections {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 3rem;
-    align-items: start;
-  }
-
-  .home__sections > section + section {
-    margin-top: 0;
   }
 
   .plants {
