@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import DataPage from './components/DataPage.jsx';
 import FlowerCheck from './components/FlowerCheck.jsx';
 import HomeScreen from './components/HomeScreen.jsx';
+import LeaveDialog from './components/LeaveDialog.jsx';
 import QuestionScreen from './components/QuestionScreen.jsx';
 import SeedMixResults from './components/SeedMixResults.jsx';
 import { plants } from './data/plants.js';
@@ -25,6 +26,9 @@ export default function App() {
   // during the pause before the next question.
   const [pending, setPending] = useState(null);
   const timer = useRef(null);
+
+  // True while asking whether to abandon the questions.
+  const [leaving, setLeaving] = useState(false);
 
   // A pending advance must not outlive the component, or React would be told
   // to update state that no longer exists.
@@ -64,6 +68,24 @@ export default function App() {
     goTo('home');
   };
 
+  // Partway through the questions, leaving loses work, so ask first. Before
+  // the first answer there is nothing to lose, and the results page keeps the
+  // answers on screen, so neither needs asking.
+  const answeredCount = Object.keys(answers).length;
+  const midSurvey = stage === 'survey' && answeredCount > 0;
+
+  const goHome = () => (midSurvey ? setLeaving(true) : startOver());
+
+  // Closing or reloading the tab mid-survey gets the browser's own warning,
+  // since the page cannot show its dialog once the tab is going away.
+  useEffect(() => {
+    if (!midSurvey) return undefined;
+
+    const warn = (event) => event.preventDefault();
+    window.addEventListener('beforeunload', warn);
+    return () => window.removeEventListener('beforeunload', warn);
+  }, [midSurvey]);
+
   // Only computed on the results screen, and only when the answers change.
   const result = useMemo(
     () => (stage === 'results' ? recommend(siteFrom(answers)) : null),
@@ -79,11 +101,22 @@ export default function App() {
   return (
     <div className="page">
       {stage !== 'home' && (
-        <div className="topbar">
-          <button type="button" className="wordmark" onClick={startOver}>
+        <nav className="topbar" aria-label="Site">
+          <button type="button" className="wordmark" onClick={goHome}>
             Seeds<span className="hero__accent">4</span>Bees
           </button>
-        </div>
+          <button type="button" className="homebtn" onClick={goHome}>
+            <svg
+              className="homebtn__icon"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <path d="M3 11.5 12 4l9 7.5" />
+              <path d="M5.5 10v9.5h5v-6h3v6h5V10" />
+            </svg>
+            Home
+          </button>
+        </nav>
       )}
 
       {stage === 'home' && (
@@ -106,6 +139,16 @@ export default function App() {
             pending={pending}
             onAnswer={answer}
             onBack={back}
+          />
+          <LeaveDialog
+            open={leaving}
+            answered={answeredCount}
+            total={questions.length}
+            onStay={() => setLeaving(false)}
+            onLeave={() => {
+              setLeaving(false);
+              startOver();
+            }}
           />
         </main>
       )}
