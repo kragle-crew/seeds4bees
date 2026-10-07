@@ -6,7 +6,11 @@ const COMMONS = 'https://commons.wikimedia.org/wiki/File:';
  * The few facts someone should know before answering the questions, kept
  * short enough to read at a glance.
  *
- * Facts come from the U.S. Fish and Wildlife Service pages for each species.
+ * Checked in October 2026 against the U.S. Fish and Wildlife Service pages
+ * for each species, news coverage of the 2017 bee listing, and the September
+ * 2026 court settlement that set the monarch decision for 2030. Recheck the
+ * monarch's status before relying on it; it is the fact most likely to change.
+ *
  * The photos are public domain, from Wikimedia Commons, and are saved in
  * public/img so the page does not depend on another site to load.
  */
@@ -14,12 +18,12 @@ const FACTS = [
   {
     title: 'Rusty patched bumble bee',
     image: '/img/bee.jpg',
-    alt: 'A rusty patched bumble bee feeding on a purple wild bergamot flower',
+    alt: 'A rusty patched bumble bee feeding on a lavender wild bergamot flower',
     points: [
-      'Listed as endangered in 2017, the first bumble bee in the U.S. to be listed.',
-      'Workers have a rusty patch of hair on their back, which gives the bee its name.',
-      'Nests underground, often in old mouse burrows.',
-      'Needs flowers from April to October. More pollen means a colony raises more new queens.',
+      'In 2017 it became the first bumble bee in the U.S. to be listed as endangered.',
+      'Workers and males have a rusty patch on their abdomen, which gives the bee its name.',
+      'Nests underground, usually in old rodent burrows.',
+      'Flies from early spring to mid-October and needs flowers the whole time. More pollen means a colony raises more new queens.',
     ],
     credit: 'Jill Utrup, USFWS (public domain)',
     creditUrl: `${COMMONS}Rusty-patched_bumble_bee_wild_bergamot.png`,
@@ -29,12 +33,12 @@ const FACTS = [
     image: '/img/monarch.jpg',
     alt: 'An orange and black monarch butterfly hanging from pink common milkweed flowers',
     points: [
-      'Flies from as far as Canada to the mountains of central Mexico for the winter.',
-      'Its caterpillars eat only milkweed, and nothing else.',
-      'Proposed as a threatened species in 2024.',
-      'Eastern monarchs have a 56 to 74 percent chance of dying out by 2080.',
+      'Eastern monarchs fly from as far as Canada to the mountains of central Mexico for the winter.',
+      'Its caterpillars can eat only milkweed.',
+      'Proposed as a threatened species in 2024, but not protected yet. A final decision is due by 2030.',
+      'The U.S. Fish and Wildlife Service estimates eastern monarchs have a 56 to 74 percent chance of dying out by 2080.',
     ],
-    credit: 'USFWS Midwest Region (public domain)',
+    credit: 'Courtney Celley, USFWS (public domain)',
     creditUrl: `${COMMONS}Monarch_butterfly_on_common_milkweed_(48372505506).jpg`,
   },
   {
@@ -43,11 +47,11 @@ const FACTS = [
     alt: 'A close-up of a lavender wild bergamot flower',
     points: [
       'Plant flowers that bloom in spring, summer, and fall, so there is always food.',
-      'Add milkweed so monarchs have a place to lay eggs.',
-      'Choose native plants. They grow well here and feed the insects that live here.',
-      'Leave some bare ground and fallen leaves, where queens nest and spend the winter.',
+      'Add milkweed so monarchs have a place to lay their eggs.',
+      'Choose native plants. They suit the local weather and soil.',
+      'Leave fallen leaves and some ground undisturbed. Queens spend the winter just under the soil or leaf litter.',
     ],
-    credit: 'Jasper Shide (public domain, CC0)',
+    credit: 'Jasper Shide (CC0, public domain)',
     creditUrl: `${COMMONS}Monarda_fistulosa_-_Wild_Bergamot_(Flower).jpg`,
   },
 ];
@@ -56,7 +60,7 @@ const FACTS = [
  * The landing screen.
  *
  * Its job is to explain who the app is for before asking anybody to answer
- * seven questions. Someone who lands here without knowing what a rusty
+ * the questions. Someone who lands here without knowing what a rusty
  * patched bumble bee is should still understand why the questions matter.
  */
 export default function HomeScreen({
@@ -69,7 +73,10 @@ export default function HomeScreen({
   return (
     <>
       <header className="hero">
-        <span className="hero__badge">FIRST LEGO League</span>
+        <div className="hero__badges">
+          <span className="hero__badge">FIRST LEGO League</span>
+          <span className="hero__badge hero__badge--alt">Made with Claude</span>
+        </div>
         <h1 className="hero__title">
           Seeds<span className="hero__accent">4</span>Bees
         </h1>
@@ -138,20 +145,21 @@ export default function HomeScreen({
             <ol className="how">
               <li>
                 <strong>You answer questions about your spot.</strong> Sun, water,
-                soil, size, and what else lives there.
+                soil, how much room there is, and whether deer visit.
               </li>
               <li>
                 <strong>We rule out what would die.</strong> Only plants that can
-                survive those exact conditions stay in.
+                survive those conditions stay in.
               </li>
               <li>
                 <strong>We build mixes that bloom all season.</strong> Bumble bee
-                queens fly in April and workers are still out in October, so a
-                garden that only blooms in July leaves them hungry at both ends.
+                queens are out in early spring and workers are still flying in
+                October, so a garden that only blooms in July leaves them hungry
+                at both ends.
               </li>
               <li>
-                <strong>Every mix includes milkweed when it can.</strong> Monarch
-                caterpillars eat nothing else.
+                <strong>Almost every mix includes milkweed when one can grow
+                there.</strong> Monarch caterpillars can eat nothing else.
               </li>
             </ol>
             <p className="how__note">

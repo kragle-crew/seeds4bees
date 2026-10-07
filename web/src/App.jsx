@@ -102,9 +102,10 @@ export default function App() {
     <div className="page">
       {stage !== 'home' && (
         <nav className="topbar" aria-label="Site">
-          <button type="button" className="wordmark" onClick={goHome}>
+          {/* Just a name. The Home button beside it is the way back. */}
+          <span className="wordmark">
             Seeds<span className="hero__accent">4</span>Bees
-          </button>
+          </span>
           <button type="button" className="homebtn" onClick={goHome}>
             <svg
               className="homebtn__icon"
