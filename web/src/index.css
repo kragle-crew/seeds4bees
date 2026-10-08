@@ -31,6 +31,9 @@
 
 body {
   margin: 0;
+  /* The home page sky is as wide as the window; this stops it adding a
+     sideways scrollbar where the window's own scrollbar takes up room. */
+  overflow-x: clip;
   background: var(--paper);
   color: var(--ink);
   font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
@@ -61,6 +64,151 @@ body {
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+}
+
+/* --- the prairie scene behind the home heading --- */
+
+:root {
+  --sky-top: #fffdf7;
+  --sky-mid: #fdeec4;
+  --sky-low: #f8d58a;
+  --sky-horizon: #f3c063;
+  --sun-core: rgba(255, 170, 0, 0.75);
+  --sun-glow: rgba(255, 190, 60, 0.35);
+  --cloud-top: #8d8a84;
+  --cloud-bottom: #f0b850;
+  --cloud-opacity: 0.55;
+  --hill-far: #d9a441;
+  --hill-mid: #9bb35a;
+  --hill-near: #6f9a48;
+  --grass: #5d8a3c;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --sky-top: #16130d;
+    --sky-mid: #1e180e;
+    --sky-low: #3a2a0e;
+    --sky-horizon: #4d3510;
+    --sun-core: rgba(255, 190, 40, 0.85);
+    --sun-glow: rgba(244, 169, 0, 0.45);
+    --cloud-top: #0d0b07;
+    --cloud-bottom: #8a5a16;
+    --cloud-opacity: 0.9;
+    --hill-far: #4a3815;
+    --hill-mid: #33391a;
+    --hill-near: #26391b;
+    --grass: #2f4a22;
+  }
+}
+
+.hero--prairie {
+  position: relative;
+  isolation: isolate;
+  padding-bottom: 10rem;
+  border-bottom: 0;
+}
+
+/* Full width of the window, not just the page column. The page has 2rem of
+   padding above the heading, which the sky covers too. */
+.prairie {
+  position: absolute;
+  z-index: -1;
+  top: -2rem;
+  bottom: 0;
+  left: 50%;
+  width: 100vw;
+  overflow: hidden;
+  transform: translateX(-50%);
+  background: linear-gradient(
+    180deg,
+    var(--sky-top) 0%,
+    var(--sky-mid) 45%,
+    var(--sky-low) 78%,
+    var(--sky-horizon) 100%
+  );
+  pointer-events: none;
+}
+
+.prairie__sun {
+  position: absolute;
+  right: 14%;
+  bottom: 14%;
+  width: 14rem;
+  height: 14rem;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    var(--sun-core) 0%,
+    var(--sun-glow) 22%,
+    transparent 70%
+  );
+}
+
+.prairie__clouds {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 70%;
+  opacity: var(--cloud-opacity);
+}
+
+.prairie__cloud-body {
+  fill: var(--cloud-top);
+}
+
+.prairie__cloud-lit {
+  fill: var(--cloud-bottom);
+}
+
+/* A slow drift, so the sky feels alive without pulling the eye. */
+.prairie__cloud {
+  animation: cloud-drift 40s ease-in-out infinite alternate;
+}
+
+.prairie__cloud:nth-child(odd) {
+  animation-duration: 55s;
+  animation-direction: alternate-reverse;
+}
+
+@keyframes cloud-drift {
+  from {
+    translate: -30px 0;
+  }
+  to {
+    translate: 30px 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .prairie__cloud {
+    animation: none;
+  }
+}
+
+.prairie__land {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 44%;
+}
+
+.prairie__hill--far {
+  fill: var(--hill-far);
+}
+
+.prairie__hill--mid {
+  fill: var(--hill-mid);
+}
+
+.prairie__hill--near {
+  fill: var(--hill-near);
+}
+
+.prairie__grass {
+  fill: var(--grass);
 }
 
 .hero__badges {
@@ -1215,6 +1363,47 @@ a {
   gap: 0.4rem;
   color: var(--ink-soft);
   font-size: 0.85rem;
+}
+
+.filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+  gap: 0.6rem 0.8rem;
+  margin: 0.25rem 0 0.75rem;
+}
+
+.filter {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.filter__label {
+  color: var(--ink-soft);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.filter select {
+  padding: 0.45rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  background: var(--surface);
+  color: inherit;
+  font: inherit;
+  font-size: 0.875rem;
+}
+
+.filter select:focus-visible {
+  outline: 2px solid var(--honey-deep);
+  outline-offset: 1px;
+}
+
+.filters__clear {
+  align-self: end;
+  justify-self: start;
 }
 
 .check select {

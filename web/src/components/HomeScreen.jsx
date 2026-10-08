@@ -1,4 +1,5 @@
 import More from './More.jsx';
+import PrairieBackdrop from './PrairieBackdrop.jsx';
 
 const COMMONS = 'https://commons.wikimedia.org/wiki/File:';
 
@@ -72,7 +73,8 @@ export default function HomeScreen({
 }) {
   return (
     <>
-      <header className="hero">
+      <header className="hero hero--prairie">
+        <PrairieBackdrop />
         <div className="hero__badges">
           <span className="hero__badge">FIRST LEGO League</span>
           <span className="hero__badge hero__badge--alt">Made with Claude</span>
