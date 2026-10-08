@@ -3,7 +3,7 @@ import { useMemo, useState } from 'react';
 import { gardenPlants } from '../data/gardenPlants.js';
 import { plants } from '../data/plants.js';
 import { questions } from '../data/questions.js';
-import More from './More.jsx';
+import More, { PhoneFold } from './More.jsx';
 import { minimumDifference, strategies, typicalHeight } from '../lib/recommend.js';
 
 const REPO = 'https://github.com/kragle-crew/seeds4bees/blob/main/web/src';
@@ -15,6 +15,72 @@ const SOIL = { sand: 'Sand', loam: 'Loam', clay: 'Clay' };
 const SEASON = { early: 'Spring', mid: 'Summer', late: 'Fall' };
 
 const join = (values, table) => values.map((v) => table[v]).join(' ');
+
+/**
+ * The filters above the plant table, one dropdown each.
+ *
+ * Each matches the way the matcher reads the same field, so filtering here
+ * to sun, wet, and clay shows the plants a site with those answers starts
+ * from. "Any" (an empty value) turns a filter off.
+ */
+const FILTERS = [
+  {
+    id: 'sun',
+    label: 'Sun',
+    options: [['sun', 'Full sun'], ['part', 'Part sun'], ['shade', 'Shade']],
+    test: (plant, value) => plant.sun.includes(value),
+  },
+  {
+    id: 'water',
+    label: 'Water',
+    options: [['dry', 'Dry'], ['medium', 'Medium'], ['wet', 'Wet']],
+    test: (plant, value) => plant.moisture.includes(value),
+  },
+  {
+    id: 'soil',
+    label: 'Soil',
+    options: [['sand', 'Sandy'], ['loam', 'Rich and crumbly'], ['clay', 'Clay']],
+    test: (plant, value) => plant.soil.includes(value),
+  },
+  {
+    id: 'season',
+    label: 'Blooms',
+    options: [['early', 'Spring'], ['mid', 'Summer'], ['late', 'Late summer and fall']],
+    test: (plant, value) => plant.season === value,
+  },
+  {
+    id: 'height',
+    label: 'Height',
+    options: [['2', 'Under 2 ft'], ['4', 'Up to 4 ft'], ['8', 'Up to 8 ft']],
+    // The typical height, the same one the matcher judges by.
+    test: (plant, value) => typicalHeight(plant) <= Number(value),
+  },
+  {
+    id: 'type',
+    label: 'Type',
+    options: [['flower', 'Wildflowers'], ['grass', 'Grasses and sedges'], ['shrub', 'Shrubs']],
+    test: (plant, value) => plant.type === value,
+  },
+  {
+    id: 'monarch',
+    label: 'Monarch',
+    options: [['host', 'Milkweed (caterpillar food)'], ['nectar', 'Nectar for adults']],
+    test: (plant, value) => plant.monarch === value,
+  },
+  {
+    id: 'trait',
+    label: 'Must be',
+    options: [
+      ['rustyPatched', 'A rusty patched favorite'],
+      ['deerResistant', 'Deer resistant'],
+      ['saltTolerant', 'Salt tolerant'],
+      ['standingWater', 'Flood tolerant'],
+      ['easy', 'Easy to grow'],
+      ['stays', 'Stays in place'],
+    ],
+    test: (plant, value) => (value === 'stays' ? !plant.spreads : Boolean(plant[value])),
+  },
+];
 
 /**
  * The page's three parts. Most visitors want the plants; the other two are
@@ -113,6 +179,7 @@ function Flags({ plant }) {
  */
 export default function DataPage({ onHome, onBackToMixes }) {
   const [query, setQuery] = useState('');
+  const [filters, setFilters] = useState({});
   const [xercesOnly, setXercesOnly] = useState(false);
   const [sort, setSort] = useState('name');
   const [group, setGroup] = useState('plants');
@@ -120,8 +187,11 @@ export default function DataPage({ onHome, onBackToMixes }) {
   const rows = useMemo(() => {
     const q = query.trim().toLowerCase();
 
+    const active = FILTERS.filter((f) => filters[f.id]);
+
     const matched = plants.filter((plant) => {
       if (xercesOnly && !plant.xercesListed) return false;
+      if (!active.every((f) => f.test(plant, filters[f.id]))) return false;
       if (!q) return true;
       return (
         plant.common.toLowerCase().includes(q) ||
@@ -141,7 +211,9 @@ export default function DataPage({ onHome, onBackToMixes }) {
       if (sort === 'height') return typicalHeight(a) - typicalHeight(b);
       return a.common.localeCompare(b.common);
     });
-  }, [query, xercesOnly, sort]);
+  }, [query, filters, xercesOnly, sort]);
+
+  const filterCount = Object.values(filters).filter(Boolean).length;
 
   // The score table lists every plant, alphabetically, whatever the plant
   // table above it is filtered to.
@@ -263,8 +335,47 @@ export default function DataPage({ onHome, onBackToMixes }) {
                 </label>
               </div>
 
+              <PhoneFold
+                label={
+                  filterCount
+                    ? `Filters (${filterCount} on)`
+                    : 'Filter by sun, soil, and more'
+                }
+              >
+                <div className="filters" role="group" aria-label="Filter the plants">
+                  {FILTERS.map((f) => (
+                    <label key={f.id} className="filter">
+                      <span className="filter__label">{f.label}</span>
+                      <select
+                        value={filters[f.id] ?? ''}
+                        onChange={(e) =>
+                          setFilters({ ...filters, [f.id]: e.target.value })
+                        }
+                      >
+                        <option value="">Any</option>
+                        {f.options.map(([value, text]) => (
+                          <option key={value} value={value}>
+                            {text}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  ))}
+                  {filterCount > 0 && (
+                    <button
+                      type="button"
+                      className="btn btn--quiet filters__clear"
+                      onClick={() => setFilters({})}
+                    >
+                      Clear filters
+                    </button>
+                  )}
+                </div>
+              </PhoneFold>
+
               <p className="rules__note">
                 Showing {rows.length} of {plants.length}.
+                {rows.length === 0 && ' Nothing fits all of those. Try setting a filter back to Any.'}
               </p>
 
               <div className="tablewrap">
