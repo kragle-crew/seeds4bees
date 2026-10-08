@@ -44,7 +44,7 @@ const combinations = questions.reduce((n, q) => n * q.options.length, 1);
 const SUN_PHRASE = { sun: 'full sun', part: 'part sun', shade: 'shade' };
 
 /** The questions added or reshaped most recently, flagged so returning visitors spot them. */
-const NEW_QUESTIONS = new Set(['water', 'lime', 'road', 'spread']);
+const NEW_QUESTIONS = new Set(['kind']);
 
 /**
  * What picking one answer actually does to the plant list, read straight off
@@ -65,6 +65,10 @@ function effectOf(option) {
     effects.push(`plants must stay under about ${option.maxHeight} ft`);
   }
   if (option.species) effects.push(`${option.species} kinds of plant per mix`);
+  if (option.mix) {
+    const name = strategies.find((s) => s.id === option.mix)?.name;
+    effects.push(`shows the ${name} first`);
+  }
 
   return effects.length ? effects.join(', ') : 'rules nothing out';
 }
@@ -407,8 +411,8 @@ export default function DataPage({ onHome, onBackToMixes }) {
             <h3 className="rules__title">3. If nothing is left, one answer is loosened</h3>
             <More label="Read what happens">
               <p className="rules__lead">
-                Some honest answers describe a real place our list cannot fill: wet
-                sand in shade kept under two feet, or a damp shaded roadside. An empty
+                Some honest answers describe a real place our list cannot fill, like
+                a damp shaded roadside. An empty
                 page teaches nobody anything, so the app loosens the softest
                 constraint and tries again, in this order, and tells you every step
                 it took.
@@ -421,8 +425,9 @@ export default function DataPage({ onHome, onBackToMixes }) {
                 <li>Allow a different soil texture.</li>
                 <li>
                   Allow plants that cannot take road salt &mdash; reached only by
-                  shaded roadsides, because just one plant here, bush honeysuckle,
-                  takes shade and winter salt together, and only on drier ground.
+                  shaded roadsides, because just two plants here, bush honeysuckle
+                  and snowberry, take shade and winter salt together, and only on
+                  drier ground.
                 </li>
               </ol>
               <p className="rules__note">
@@ -453,7 +458,8 @@ export default function DataPage({ onHome, onBackToMixes }) {
               <ol className="rules__list">
                 <li>
                   <strong>Guarantees.</strong> A milkweed is reserved first in every
-                  mix, because monarch caterpillars eat nothing else. Some mixes
+                  mix when one can grow there, because monarch caterpillars eat
+                  nothing else. The Easy Starter mix only uses milkweeds marked easy. Some mixes
                   also reserve a grass or a shrub.
                 </li>
                 <li>
@@ -468,6 +474,11 @@ export default function DataPage({ onHome, onBackToMixes }) {
                 <li>
                   <strong>Season cap.</strong> No season may take more than half the
                   mix, so a focused mix cannot produce a spring-only garden.
+                </li>
+                <li>
+                  <strong>Type cap.</strong> In the Meadow and Shrub Border mixes,
+                  grasses or shrubs may take at most half the mix, so there are
+                  always flowers between them.
                 </li>
                 <li>
                   <strong>Size.</strong> The number of slots comes from your area:
@@ -548,12 +559,13 @@ export default function DataPage({ onHome, onBackToMixes }) {
                 The Xerces list vouches for a species being a recognised
                 pollinator plant for this region and nothing else. We also
                 checked every plant name against the Wildflower Center database,
-                and the 54 added most recently against its map of which states
-                each plant grows in. <strong>Every other value in these tables
-                is ours</strong>, from general gardening knowledge rather than
-                one website, including the sun, soil, height, bloom, deer, and
-                salt columns, and the choice of the other{' '}
-                {plants.length - count((p) => p.xercesListed)} plants.
+                and the 114 added most recently against its map of which states
+                each plant grows in. For the newest 60, the sun, moisture, and
+                soil columns also start from the Wildflower Center's record.{' '}
+                <strong>Every other value in these tables is ours</strong>, from
+                general gardening knowledge rather than one website, including
+                the height, bloom, deer, and salt columns, and the choice of the
+                other {plants.length - count((p) => p.xercesListed)} plants.
               </p>
             </More>
 

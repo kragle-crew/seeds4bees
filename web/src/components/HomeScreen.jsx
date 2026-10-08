@@ -145,7 +145,8 @@ export default function HomeScreen({
             <ol className="how">
               <li>
                 <strong>You answer questions about your spot.</strong> Sun, water,
-                soil, how much room there is, and whether deer visit.
+                soil, how much room there is, and whether deer visit. Then you
+                pick the kind of mix you want.
               </li>
               <li>
                 <strong>We rule out what would die.</strong> Only plants that can

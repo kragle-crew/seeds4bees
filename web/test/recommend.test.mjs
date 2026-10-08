@@ -36,6 +36,7 @@ const answers = (overrides = {}) => ({
   road: 'no',
   spread: 'fine',
   deer: 'none',
+  kind: 'season',
   ...overrides,
 });
 
@@ -429,30 +430,88 @@ function* allAnswers(index = 0, acc = {}) {
 }
 
 test('no combination of answers is a dead end', () => {
-  // About 10,000 combinations. Slow for a unit test and worth it: this is
+  // About 60,000 combinations. Slow for a unit test and worth it: this is
   // the promise that somebody who answers honestly is never handed an empty
   // page, and it is easy to break by tightening a filter.
+  //
+  // The same walk checks the last question. The kind of mix someone asks for
+  // must come first whenever it can be made, and the only way it cannot is a
+  // filtered mix with nothing left to choose from.
   let checked = 0;
   const failures = [];
+  const notFirst = [];
 
   for (const answers of allAnswers()) {
     checked += 1;
-    const { pool, mixes } = recommend(siteFrom(answers));
+    const site = siteFrom(answers);
+    const { pool, mixes, preferred } = recommend(site);
 
     if (pool.length === 0 || mixes.length === 0) {
       if (failures.length < 5) failures.push(answers);
+    }
+
+    const strategy = strategies.find((s) => s.id === site.preferredMix);
+    const possible = !strategy.filter || pool.some(strategy.filter);
+    const first = mixes[0]?.id === site.preferredMix;
+
+    if (preferred.made !== first || first !== possible) {
+      if (notFirst.length < 5) notFirst.push(answers);
     }
   }
 
   const expected = questions.reduce((n, q) => n * q.options.length, 1);
   assert.equal(checked, expected, 'expected to walk the whole space');
   assert.deepEqual(failures, [], 'these answers produce nothing at all');
+  assert.deepEqual(notFirst, [], 'the chosen kind of mix was not shown first');
+});
+
+test('the meadow and shrub mixes leave room for flowers', () => {
+  // Without the cap, grasses and shrubs outscore every flower and these two
+  // come out as a lawn and a hedge.
+  for (const site of [sunnyBed, siteFrom(answers({ sun: 'shade' })), siteFrom(answers({ size: 'large' }))]) {
+    const pool = poolFor(site);
+
+    for (const [id, type] of [['meadow', 'grass'], ['hedgerow', 'shrub']]) {
+      const mix = buildMix(strategies.find((s) => s.id === id), pool, site);
+      const count = mix.picks.filter((p) => p.type === type).length;
+
+      assert.ok(count >= 1, `${id} should still include a ${type}`);
+      assert.ok(
+        count <= Math.ceil(mix.picks.length / 2),
+        `${id} is ${count} of ${mix.picks.length} ${type}`,
+      );
+    }
+  }
+});
+
+test('every kind of mix on offer is a real mix', () => {
+  const kind = questions.find((q) => q.id === 'kind');
+  assert.ok(kind.options.length >= 4, 'the kind question needs at least four answers');
+
+  const ids = new Set(strategies.map((s) => s.id));
+  for (const option of kind.options) {
+    assert.ok(ids.has(option.mix), `${option.value} points at a mix that does not exist`);
+  }
+});
+
+test('the chosen kind of mix comes first, and only changes the order', () => {
+  const plain = recommend(sunnyBed);
+
+  for (const option of questions.find((q) => q.id === 'kind').options) {
+    const result = recommend(siteFrom(answers({ kind: option.value })));
+
+    assert.equal(result.mixes[0].id, option.mix);
+    assert.deepEqual(result.preferred, { id: option.mix, made: true });
+    // Same ground, same plants: the answer must not change what can grow.
+    assert.deepEqual(result.pool, plain.pool);
+  }
 });
 
 test('a compromise is always explained, and never invented', () => {
   for (const overrides of [
-    // Wet sand in shade, kept short: a real place our list cannot fill.
-    { sun: 'shade', water: 'damp', soil: 'sand', height: 'low' },
+    // Dry clay in deep shade, kept short, with deer: only plants deer eat
+    // fit, so that is the compromise to report.
+    { sun: 'shade', water: 'dry', soil: 'clay', height: 'low', deer: 'some' },
     // A damp, shaded roadside: nothing here takes shade, wet ground, and
     // road salt at once.
     { road: 'yes', sun: 'shade', water: 'damp', soil: 'loam' },
@@ -464,6 +523,18 @@ test('a compromise is always explained, and never invented', () => {
     assert.ok(relaxed.length > 0, 'a compromise must be reported, not hidden');
     for (const note of relaxed) assert.equal(typeof note, 'string');
   }
+});
+
+test('a loosening is only reported when it changed something', () => {
+  // Nobody here asked to keep deer-browsed or spreading plants out, so
+  // "allowing" them is not a compromise and must not be listed as one.
+  const { relaxed } = recommend(
+    siteFrom(answers({ road: 'yes', sun: 'shade', water: 'damp', soil: 'loam' })),
+  );
+
+  assert.ok(relaxed.length > 0);
+  assert.ok(!relaxed.some((note) => note.includes('deer')), relaxed.join('; '));
+  assert.ok(!relaxed.some((note) => note.includes('spread')), relaxed.join('; '));
 });
 
 test('an easy site needs no compromise at all', () => {

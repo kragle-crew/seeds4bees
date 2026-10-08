@@ -1,9 +1,11 @@
 /**
  * The site survey.
  *
- * Every question here has to earn its place by actually changing the plant
- * list. A question whose answer we would ignore is just a chore for the
- * visitor, so there are no "what is your favorite colour" questions.
+ * Every question here has to earn its place by actually changing what the
+ * visitor gets. A question whose answer we would ignore is just a chore, so
+ * there are no "what is your favorite colour" questions. All but the last
+ * decide which plants can grow; the last decides which kind of mix to show
+ * first.
  *
  * ONE DELIBERATE OMISSION
  *
@@ -23,6 +25,8 @@
  *   noSpreaders             drop the plants that run or self-seed around
  *   deerPressure            drop the plants deer strip first
  *   species                 how many kinds of plant to recommend
+ *   mix                     which kind of mix to put first (a strategy id
+ *                           from lib/recommend.js)
  */
 
 export const questions = [
@@ -243,6 +247,49 @@ export const questions = [
       },
     ],
   },
+  {
+    id: 'kind',
+    title: 'What kind of seed mix do you want?',
+    help: 'This picks which mix you see first. The other kinds will still be there to look at.',
+    options: [
+      {
+        value: 'season',
+        label: 'Flowers all season',
+        detail: 'Something blooming from spring to fall. The safest choice',
+        mix: 'full-season',
+      },
+      {
+        value: 'bees',
+        label: 'Best for bumble bees',
+        detail: 'Extra spring and fall flowers, plus grass for nesting',
+        mix: 'bumble-bee',
+      },
+      {
+        value: 'monarchs',
+        label: 'Best for monarchs',
+        detail: 'Lots of milkweed, plus nectar for the trip to Mexico',
+        mix: 'monarch',
+      },
+      {
+        value: 'easy',
+        label: 'Easy to grow',
+        detail: 'Forgiving plants that are easy to find and hard to kill',
+        mix: 'easy-start',
+      },
+      {
+        value: 'tidy',
+        label: 'Short and tidy',
+        detail: 'Low plants that stay put, for beds people look at',
+        mix: 'short',
+      },
+      {
+        value: 'meadow',
+        label: 'Wild meadow',
+        detail: 'Flowers mixed with native grasses, like a real prairie',
+        mix: 'meadow',
+      },
+    ],
+  },
 ];
 
 /** Every question must be answered before a mix is worth showing. */
@@ -274,6 +321,7 @@ export function siteFrom(answers) {
     noSpreaders: false,
     deerPressure: false,
     species: 8,
+    preferredMix: null,
   };
 
   for (const option of chosen) {
@@ -286,6 +334,7 @@ export function siteFrom(answers) {
     if (option.noSpreaders) site.noSpreaders = true;
     if (option.deerPressure) site.deerPressure = true;
     if (option.species) site.species = option.species;
+    if (option.mix) site.preferredMix = option.mix;
     // Two answers can cap height: pots, and the height question itself.
     // The stricter cap wins, because a 6 foot plant in a pot fails either way.
     if (option.maxHeight) site.maxHeight = Math.min(site.maxHeight, option.maxHeight);

@@ -125,7 +125,7 @@ function ServesPanel({ serves }) {
  * than hiding the choice behind a single confident-looking list.
  */
 export default function SeedMixResults({ result, onReview, onRestart, onSeeData }) {
-  const { mixes, warnings, pool, relaxed = [] } = result;
+  const { mixes, warnings, pool, relaxed = [], preferred = null } = result;
   const [activeId, setActiveId] = useState(mixes[0]?.id);
   const [allMixes, setAllMixes] = useState(false);
   const [showWhy, setShowWhy] = useState(false);
@@ -170,6 +170,14 @@ export default function SeedMixResults({ result, onReview, onRestart, onSeeData 
         </div>
       )}
 
+      {preferred && !preferred.made && mixes[0] && (
+        <p className="warning warning--soft">
+          None of the plants that grow in this spot fit the{' '}
+          {strategies.find((s) => s.id === preferred.id)?.name}, so we started
+          with the {mixes[0].name} instead.
+        </p>
+      )}
+
       {warnings.length > 0 && (
         <div className="warnings">
           {warnings.map((warning) => (
@@ -212,7 +220,12 @@ export default function SeedMixResults({ result, onReview, onRestart, onSeeData 
                 className={`mixtab${mix.id === active.id ? ' mixtab--on' : ''}`}
                 onClick={() => setActiveId(mix.id)}
               >
-                <span className="mixtab__name">{mix.name}</span>
+                <span className="mixtab__name">
+                  {mix.name}
+                  {preferred?.made && mix.id === preferred.id && (
+                    <span className="mixtab__pick">Your pick</span>
+                  )}
+                </span>
                 <span className="mixtab__tagline">{mix.tagline}</span>
               </button>
             ))}

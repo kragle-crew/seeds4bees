@@ -108,6 +108,7 @@ const isShrub = (plant) => plant.type === 'shrub';
  *   filterNote  says, in a sentence, what the filter keeps
  *   must     guarantees that get a slot before score is consulted
  *   balance  fill seasons round robin instead of best first
+ *   typeCap  most of the mix one type of plant may take, as a share
  *   score    ranks whatever is left
  */
 export const strategies = [
@@ -255,6 +256,9 @@ export const strategies = [
     blurb:
       'Prairies are mostly grass. Grasses hold the flowers up, keep out weeds, and give bumble bee queens the soil and thatch they overwinter in. This mix gives grasses real space instead of one token slot.',
     must: [isGrass, isMilkweed],
+    // Half and half. Without a cap the grasses outscore every flower and the
+    // "meadow" is six grasses and a milkweed, which feeds nobody.
+    typeCap: { grass: 0.5 },
     score: (plant) =>
       (isGrass(plant) ? 7 : 0) +
       (plant.rustyPatched ? 3 : 0) +
@@ -268,6 +272,8 @@ export const strategies = [
     blurb:
       'Native shrubs flower heavily, live for decades, and give bees shelter from wind. Planted with wildflowers they make a border that blooms on two levels. Only a few of our plants are shrubs, so this mix only differs from the others where they grow.',
     must: [isShrub, isMilkweed],
+    // A border of shrubs with flowers around them, not a hedge alone.
+    typeCap: { shrub: 0.5 },
     score: (plant) =>
       (isShrub(plant) ? 7 : 0) +
       (plant.rustyPatched ? 3 : 0) +
@@ -380,8 +386,15 @@ export function buildMix(strategy, pool, site) {
   const seasonCap = Math.max(1, Math.ceil(limit / 2));
   const spent = (season) => picked.filter((p) => p.season === season).length;
 
+  // The same idea for plant types, in the mixes that favor one.
+  const typeCap = (type) =>
+    strategy.typeCap?.[type] ? Math.max(1, Math.ceil(limit * strategy.typeCap[type])) : limit;
+  const ofType = (type) => picked.filter((p) => p.type === type).length;
+
   for (const plant of order) {
-    if (spent(plant.season) < seasonCap) take(plant);
+    if (spent(plant.season) < seasonCap && ofType(plant.type) < typeCap(plant.type)) {
+      take(plant);
+    }
   }
 
   // If the cap left the mix short (a site with little variety), fill it.
@@ -498,9 +511,10 @@ const distinct = (mixes) => {
  *
  * Sun and standing water are never relaxed: getting those wrong does not
  * disappoint somebody, it kills the plant. Salt is relaxed only as a last
- * resort, because only one plant here (bush honeysuckle) takes shade and road
- * salt together, and it wants dry or medium ground. A damp shaded roadside
- * is a real place somebody might be standing in, and nothing here fits it.
+ * resort, because only two plants here (bush honeysuckle and snowberry) take
+ * shade and road salt together, and both want dry or medium ground. A damp
+ * shaded roadside is a real place somebody might be standing in, and nothing
+ * here fits it.
  */
 const RELAXATIONS = [
   { apply: (s) => ({ ...s, deerPressure: false }), note: 'plants that deer may browse' },
@@ -509,8 +523,8 @@ const RELAXATIONS = [
   { apply: (s) => ({ ...s, maxHeight: 99 }), note: 'plants taller than you asked for' },
   { apply: (s) => ({ ...s, soil: null }), note: 'plants suited to a different soil texture' },
   {
-    // Last resort, and only reached by shaded roadsides that bush honeysuckle
-    // cannot fill. Inventing a salt tolerance would be worse than admitting
+    // Last resort, and only reached by shaded roadsides too wet for bush
+    // honeysuckle and snowberry. Inventing a salt tolerance would be worse than admitting
     // the gap. The note has to carry real advice, because these plants will
     // die where spray reaches them.
     apply: (s) => ({ ...s, requireSalt: false }),
@@ -529,7 +543,13 @@ export function relaxUntilPossible(site, plants = ALL_PLANTS) {
   const relaxed = [];
 
   for (const step of RELAXATIONS) {
-    current = step.apply(current);
+    const next = step.apply(current);
+
+    // A step that changes nothing, like allowing deer-browsed plants for
+    // someone who never ruled them out, is not a compromise worth reporting.
+    if (JSON.stringify(next) === JSON.stringify(current)) continue;
+
+    current = next;
     relaxed.push(step.note);
 
     if (poolFor(current, plants).length > 0) return { site: current, relaxed };
@@ -538,13 +558,39 @@ export function relaxUntilPossible(site, plants = ALL_PLANTS) {
   return { site: current, relaxed };
 }
 
+/**
+ * The strategies in the order to try them: the visitor's chosen kind first,
+ * then the rest in their usual order.
+ *
+ * Going first is what keeps the chosen kind on the page. When two mixes come
+ * out nearly the same, the earlier one is kept, so the kind someone asked for
+ * is never the one hidden as a copy.
+ */
+const inOrder = (preferred) => {
+  const first = strategies.find((s) => s.id === preferred);
+  return first ? [first, ...strategies.filter((s) => s !== first)] : strategies;
+};
+
 /** The whole recommendation: what could grow, what we suggest, what to watch for. */
 export function recommend(site, plants = ALL_PLANTS) {
   const { site: used, relaxed } = relaxUntilPossible(site, plants);
   const pool = poolFor(used, plants);
+
+  // A mix with a filter can come out empty, like Easy Starter where nothing
+  // easy grows. An empty mix is not a mix, so it is dropped before anything
+  // else can be compared with it.
   const mixes = pool.length
-    ? distinct(strategies.map((s) => buildMix(s, pool, used)))
+    ? distinct(
+        inOrder(site.preferredMix)
+          .map((s) => buildMix(s, pool, used))
+          .filter((mix) => mix.picks.length > 0),
+      )
     : [];
 
-  return { pool, mixes, warnings: warningsFor(pool, used), relaxed };
+  // Whether the kind the visitor asked for could be made here at all.
+  const preferred = site.preferredMix
+    ? { id: site.preferredMix, made: mixes[0]?.id === site.preferredMix }
+    : null;
+
+  return { pool, mixes, warnings: warningsFor(pool, used), relaxed, preferred };
 }
